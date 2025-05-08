@@ -6,9 +6,9 @@
     <title>SmartKidsInvest - Finanzanalyse für Eltern</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PDF-Bibliotheken -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- PDF-Generierung mit jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -427,72 +427,158 @@
             opacity: 1;
         }
         
-        .message.error {
-            background-color: #ef4444;
-        }
-        
-        /* PDF-Container für den Download */
-        #pdfContainer {
-            position: absolute;
-            left: -9999px;
-            top: -9999px;
-        }
-        
-        .pdf-page {
-            width: 210mm;
-            height: 297mm;
-            padding: 20mm;
-            background-color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        /* Druckstile */
-        @media print {
-            body {
-                background-color: white;
-                margin: 0;
-                padding: 0;
-            }
-            
-            .no-print {
-                display: none !important;
-            }
-            
-            .page {
-                width: 100%;
-                margin: 0;
-                padding: 10mm;
-                box-shadow: none;
-                border-radius: 0;
-                page-break-after: always;
-            }
-        }
-        
         /* Ladeanimation */
         .loading-spinner {
             display: inline-block;
             width: 20px;
             height: 20px;
-            margin-right: 10px;
             border: 3px solid rgba(255,255,255,.3);
             border-radius: 50%;
-            border-top-color: #fff;
+            border-top-color: white;
             animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
         }
         
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+        
+        /* PDF-Vorschau-Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 9999;
+            overflow: auto;
+        }
+        
+        .modal-content {
+            position: relative;
+            background-color: #f8fafc;
+            margin: 5% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #666;
+            cursor: pointer;
+        }
+        
+        .modal-header {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .modal-footer {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #e2e8f0;
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .download-btn {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        /* Fortschrittsanzeige */
+        .progress-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        /* Für die PDF-Generierung */
+        .pdf-page {
+            background-color: white;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .pdf-container {
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 10px;
         }
     </style>
 </head>
 <body>
     <!-- Meldung für Statusanzeigen -->
     <div id="message" class="message">
-        <div class="loading-spinner"></div>
-        <span id="messageText">Daten werden vorbereitet...</span>
+        <div class="loading-spinner" id="messageSpinner"></div>
+        <span id="messageText">PDF wird vorbereitet...</span>
     </div>
     
+    <!-- PDF-Vorschau-Modal -->
+    <div id="pdfModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeModal">&times;</span>
+            <div class="modal-header">
+                <h2 class="text-xl font-bold text-gray-800">PDF-Vorschau</h2>
+                <p class="text-gray-600">Ihre Finanzanalyse ist bereit zum Download</p>
+            </div>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <div class="pdf-container" id="pdfPreview">
+                <!-- Hier wird die PDF-Vorschau angezeigt -->
+            </div>
+            
+            <div class="modal-footer">
+                <button id="downloadPdfBtn" class="download-btn">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    PDF herunterladen
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="page1" class="page">
         <div class="page-background">
             <div class="color-blob blob-1"></div>
@@ -851,28 +937,28 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input type="text" id="goal_1_name" class="w-full border-0" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_1_age" class="w-full border-0" placeholder="18" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_1_capital" class="w-full border-0" placeholder="2.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_1_priority" class="w-full border-0" placeholder="2" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="18" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="2.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="2" style="border-color: #6ee7b7;"></td>
                         </tr>
                         <tr>
-                            <td><input type="text" id="goal_2_name" class="w-full border-0" placeholder="z.B. Studium" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_2_age" class="w-full border-0" placeholder="19-25" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_2_capital" class="w-full border-0" placeholder="30.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_2_priority" class="w-full border-0" placeholder="1" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Studium" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="19-25" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="30.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="1" style="border-color: #6ee7b7;"></td>
                         </tr>
                         <tr>
-                            <td><input type="text" id="goal_3_name" class="w-full border-0" placeholder="z.B. Auslandsjahr" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_3_age" class="w-full border-0" placeholder="20" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_3_capital" class="w-full border-0" placeholder="10.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_3_priority" class="w-full border-0" placeholder="3" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Auslandsjahr" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="20" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="10.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="3" style="border-color: #6ee7b7;"></td>
                         </tr>
                         <tr>
-                            <td><input type="text" id="goal_4_name" class="w-full border-0" placeholder="z.B. Eigenheim" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_4_age" class="w-full border-0" placeholder="30" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_4_capital" class="w-full border-0" placeholder="50.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_4_priority" class="w-full border-0" placeholder="4" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Eigenheim" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="30" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="50.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="4" style="border-color: #6ee7b7;"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -935,11 +1021,11 @@
                 </svg>
                 Zurück zu Seite 2
             </button>
-            <button id="generatePdfBtn" class="nav-button btn-download flex items-center" onclick="generatePDF()">
+            <button id="generatePdfBtn" class="nav-button btn-download flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                 </svg>
-                PDF Download
+                Als PDF herunterladen
             </button>
         </div>
         
@@ -950,21 +1036,9 @@
         </div>
     </div>
     
-    <!-- Container für PDF-Generierung -->
-    <div id="pdfContainer">
-        <div id="pdfPage1" class="pdf-page"></div>
-        <div id="pdfPage2" class="pdf-page"></div>
-        <div id="pdfPage3" class="pdf-page"></div>
-    </div>
-    
     <script>
-        // Warten bis das Dokument vollständig geladen ist
-        document.addEventListener('DOMContentLoaded', function() {
-            // Prüfen, ob die PDF-Bibliotheken geladen sind
-            if (typeof window.jspdf === 'undefined') {
-                window.jspdf = window.jspdf || {};
-            }
-        });
+        // Globale Variablen
+        let pdfDocument = null;
         
         // Seiten-Navigation
         function showPage(pageNum) {
@@ -981,16 +1055,17 @@
         }
         
         // Meldung anzeigen
-        function showMessage(text, duration = 3000, isError = false) {
+        function showMessage(text, showSpinner = false, duration = 3000) {
             const message = document.getElementById('message');
             const messageText = document.getElementById('messageText');
+            const spinner = document.getElementById('messageSpinner');
             
             messageText.textContent = text;
             
-            if (isError) {
-                message.classList.add('error');
+            if (showSpinner) {
+                spinner.style.display = 'inline-block';
             } else {
-                message.classList.remove('error');
+                spinner.style.display = 'none';
             }
             
             message.classList.add('show');
@@ -1011,258 +1086,174 @@
             };
         }
         
-        // Formularwerte für PDF vorbereiten
-        function prepareFormValues() {
-            // Objekt für alle Formularwerte
-            const formValues = {};
-            
-            // Textfelder und Textareas
-            const textInputs = document.querySelectorAll('input[type="text"], textarea');
-            textInputs.forEach(input => {
-                formValues[input.id] = input.value || input.placeholder;
-            });
-            
-            // Checkboxen
-            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-            checkboxes.forEach(checkbox => {
-                formValues[checkbox.id] = checkbox.checked;
-            });
-            
-            return formValues;
+        // Fortschrittsbalken aktualisieren
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('progressBar');
+            progressBar.style.width = percent + '%';
         }
         
-        // PDF-Seiten vorbereiten
-        function preparePDFPages() {
-            // Formularwerte holen
-            const formValues = prepareFormValues();
+        // PDF-Vorschau erstellen
+        function createPdfPreview() {
+            const pdfPreview = document.getElementById('pdfPreview');
+            pdfPreview.innerHTML = '';
             
-            // Seite 1 vorbereiten
-            const page1 = document.getElementById('page1').cloneNode(true);
-            const pdfPage1 = document.getElementById('pdfPage1');
-            pdfPage1.innerHTML = '';
-            pdfPage1.appendChild(page1);
-            
-            // Seite 2 vorbereiten
-            const page2 = document.getElementById('page2').cloneNode(true);
-            const pdfPage2 = document.getElementById('pdfPage2');
-            pdfPage2.innerHTML = '';
-            pdfPage2.appendChild(page2);
-            
-            // Seite 3 vorbereiten
-            const page3 = document.getElementById('page3').cloneNode(true);
-            const pdfPage3 = document.getElementById('pdfPage3');
-            pdfPage3.innerHTML = '';
-            pdfPage3.appendChild(page3);
-            
-            // Nicht-druckbare Elemente entfernen
-            const noPrintElements = document.querySelectorAll('#pdfContainer .no-print');
-            noPrintElements.forEach(el => {
-                el.remove();
-            });
-            
-            // Formularwerte in statischen Text umwandeln
-            updatePDFFormValues(pdfPage1, formValues);
-            updatePDFFormValues(pdfPage2, formValues);
-            updatePDFFormValues(pdfPage3, formValues);
-            
-            return [pdfPage1, pdfPage2, pdfPage3];
-        }
-        
-        // Formularwerte in statischen Text umwandeln
-        function updatePDFFormValues(container, formValues) {
-            // Textfelder und Textareas
-            const textInputs = container.querySelectorAll('input[type="text"], textarea');
-            textInputs.forEach(input => {
-                const value = formValues[input.id] || input.placeholder;
-                const textNode = document.createElement('div');
-                textNode.textContent = value;
-                textNode.style.padding = '10px';
-                textNode.style.border = '1px solid #e2e8f0';
-                textNode.style.borderRadius = '8px';
-                textNode.style.backgroundColor = '#f8fafc';
-                input.parentNode.replaceChild(textNode, input);
-            });
-            
-            // Checkboxen
-            const checkboxContainers = container.querySelectorAll('.checkbox-container');
-            checkboxContainers.forEach(container => {
-                const checkbox = container.querySelector('input[type="checkbox"]');
-                if (checkbox) {
-                    const isChecked = formValues[checkbox.id];
-                    const checkmark = container.querySelector('.checkmark');
-                    if (checkmark) {
-                        checkmark.style.opacity = isChecked ? '1' : '0';
-                    }
-                    checkbox.style.pointerEvents = 'none';
-                }
-            });
-        }
-        
-        // PDF generieren und herunterladen
-        function generatePDF() {
-            // Meldung anzeigen
-            const loadingMsg = showMessage('PDF wird erstellt...', 0);
-            
-            // Sicherstellen, dass die jsPDF-Bibliothek geladen ist
-            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
-                loadingMsg.update('Lade PDF-Bibliothek...');
+            // Für jede Seite eine Vorschau erstellen
+            for (let i = 1; i <= 3; i++) {
+                const pageClone = document.getElementById('page' + i).cloneNode(true);
+                pageClone.style.display = 'block';
+                pageClone.style.transform = 'scale(0.7)';
+                pageClone.style.transformOrigin = 'top center';
+                pageClone.style.margin = '0 auto 30px auto';
                 
-                // Versuchen, die Bibliothek erneut zu laden
-                const jsPdfScript = document.createElement('script');
-                jsPdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-                jsPdfScript.onload = function() {
-                    const html2canvasScript = document.createElement('script');
-                    html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-                    html2canvasScript.onload = function() {
-                        // Bibliotheken geladen, PDF erstellen
-                        setTimeout(() => {
-                            createPDF(loadingMsg);
-                        }, 500);
-                    };
-                    document.head.appendChild(html2canvasScript);
-                };
-                document.head.appendChild(jsPdfScript);
-                return;
+                // Entferne Navigations- und Indikatorelemente aus dem Klon
+                const navElements = pageClone.querySelectorAll('.no-print');
+                navElements.forEach(el => el.remove());
+                
+                // Erstelle einen Container für die Seite
+                const pageContainer = document.createElement('div');
+                pageContainer.className = 'pdf-page';
+                pageContainer.appendChild(pageClone);
+                
+                pdfPreview.appendChild(pageContainer);
             }
-            
-            // PDF erstellen
-            createPDF(loadingMsg);
         }
         
-        // PDF erstellen und herunterladen
-        function createPDF(loadingMsg) {
+        // PDF generieren
+        async function generatePDF() {
+            // jsPDF initialisieren
+            const { jsPDF } = window.jspdf;
+            
+            // Meldung anzeigen
+            const msg = showMessage('PDF wird vorbereitet...', true, 0);
+            
             try {
-                // PDF-Seiten vorbereiten
-                const pdfPages = preparePDFPages();
+                // Neues PDF-Dokument erstellen (A4-Format)
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                pdfDocument = pdf;
                 
-                // PDF erstellen
-                loadingMsg.update('Erstelle PDF...');
-                
-                // Einfachere Methode mit direktem Download
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('p', 'mm', 'a4');
-                
-                // Seiten nacheinander verarbeiten
-                processPage(0);
-                
-                function processPage(index) {
-                    if (index >= pdfPages.length) {
-                        // Alle Seiten verarbeitet, PDF speichern
-                        const today = new Date();
-                        const dateStr = today.toISOString().slice(0, 10);
-                        doc.save(`SmartKidsInvest_Finanzanalyse_${dateStr}.pdf`);
-                        
-                        // Meldung aktualisieren
-                        loadingMsg.update('PDF erfolgreich erstellt!');
-                        setTimeout(() => {
-                            loadingMsg.hide();
-                        }, 2000);
-                        return;
-                    }
+                // Für jede Seite
+                for (let i = 1; i <= 3; i++) {
+                    // Fortschritt aktualisieren
+                    updateProgress((i - 1) * 30);
+                    msg.update(`Seite ${i} von 3 wird verarbeitet...`);
                     
-                    // Fortschritt anzeigen
-                    loadingMsg.update(`Verarbeite Seite ${index + 1} von ${pdfPages.length}...`);
+                    // Seite sichtbar machen für die Konvertierung
+                    const page = document.getElementById('page' + i);
+                    const originalDisplay = page.style.display;
+                    page.style.display = 'block';
+                    
+                    // Navigations- und Indikatorelemente temporär ausblenden
+                    const navElements = page.querySelectorAll('.no-print');
+                    navElements.forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Warten, damit die Seite vollständig gerendert wird
+                    await new Promise(resolve => setTimeout(resolve, 100));
                     
                     // Seite in Canvas umwandeln
-                    html2canvas(pdfPages[index], {
-                        scale: 1.5, // Höhere Qualität
+                    const canvas = await html2canvas(page, {
+                        scale: 2, // Höhere Qualität
                         useCORS: true,
                         logging: false,
-                        allowTaint: true,
                         backgroundColor: '#ffffff'
-                    }).then(canvas => {
-                        // Canvas zu Bild konvertieren
-                        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                        
-                        // Wenn nicht die erste Seite, neue Seite hinzufügen
-                        if (index > 0) {
-                            doc.addPage();
-                        }
-                        
-                        // Bild zum PDF hinzufügen
-                        const imgWidth = 210; // A4 Breite in mm
-                        const imgHeight = canvas.height * imgWidth / canvas.width;
-                        doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-                        
-                        // Nächste Seite verarbeiten
-                        setTimeout(() => {
-                            processPage(index + 1);
-                        }, 200);
-                    }).catch(error => {
-                        console.error('Fehler beim Konvertieren der Seite:', error);
-                        loadingMsg.update('Fehler beim Erstellen des PDFs');
-                        loadingMsg.hide();
-                        showMessage('Fehler beim Erstellen des PDFs. Bitte versuchen Sie es erneut.', 5000, true);
                     });
-                }
-            } catch (error) {
-                console.error('Fehler beim Erstellen des PDFs:', error);
-                loadingMsg.update('Fehler beim Erstellen des PDFs');
-                loadingMsg.hide();
-                showMessage('Fehler beim Erstellen des PDFs. Bitte versuchen Sie es erneut.', 5000, true);
-            }
-        }
-        
-        // Alternative Methode für den PDF-Download (falls die erste nicht funktioniert)
-        function downloadPDF() {
-            const loadingMsg = showMessage('PDF wird erstellt...', 0);
-            
-            try {
-                // Alle Seiten anzeigen für den Druck
-                document.getElementById('page1').style.display = 'block';
-                document.getElementById('page2').style.display = 'block';
-                document.getElementById('page3').style.display = 'block';
-                
-                // Nicht-druckbare Elemente ausblenden
-                const noPrintElements = document.querySelectorAll('.no-print');
-                noPrintElements.forEach(el => {
-                    el.style.display = 'none';
-                });
-                
-                // Druckdialog öffnen
-                loadingMsg.update('Druckdialog wird geöffnet...');
-                window.print();
-                
-                // Nach dem Druck zurücksetzen
-                setTimeout(() => {
-                    // Nicht-druckbare Elemente wieder anzeigen
-                    noPrintElements.forEach(el => {
+                    
+                    // Canvas in PDF einfügen
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const imgWidth = 210; // A4 Breite in mm
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    
+                    if (i > 1) {
+                        pdf.addPage();
+                    }
+                    
+                    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                    
+                    // Fortschritt aktualisieren
+                    updateProgress(i * 30);
+                    
+                    // Ursprünglichen Zustand wiederherstellen
+                    page.style.display = originalDisplay;
+                    navElements.forEach(el => {
                         el.style.display = '';
                     });
-                    
-                    // Nur aktuelle Seite anzeigen
-                    document.getElementById('page1').style.display = 'none';
-                    document.getElementById('page2').style.display = 'none';
-                    document.getElementById('page3').style.display = 'none';
-                    document.getElementById('page3').style.display = 'block';
-                    
-                    loadingMsg.hide();
-                }, 1000);
+                }
+                
+                // PDF-Vorschau erstellen
+                createPdfPreview();
+                
+                // Modal öffnen
+                document.getElementById('pdfModal').style.display = 'block';
+                
+                // Fortschritt abschließen
+                updateProgress(100);
+                msg.hide();
+                
             } catch (error) {
-                console.error('Fehler beim Drucken:', error);
-                loadingMsg.update('Fehler beim Erstellen des PDFs');
-                loadingMsg.hide();
-                showMessage('Fehler beim Erstellen des PDFs. Bitte versuchen Sie es erneut.', 5000, true);
+                console.error('PDF-Generierungsfehler:', error);
+                msg.update('Fehler bei der PDF-Erstellung. Bitte erneut versuchen.');
+                setTimeout(() => msg.hide(), 3000);
             }
         }
         
-        // Fallback-Methode für den Download-Button
-        document.getElementById('generatePdfBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Versuche zuerst die PDF-Generierung
-            try {
-                generatePDF();
-            } catch (error) {
-                console.error('Fehler bei der PDF-Generierung, versuche Drucken:', error);
-                showMessage('PDF-Generierung nicht möglich. Öffne Druckdialog...', 3000);
+        // PDF herunterladen
+        function downloadPDF() {
+            if (pdfDocument) {
+                // Dateiname mit aktuellem Datum
+                const today = new Date();
+                const dateStr = today.toLocaleDateString('de-DE').replace(/\./g, '-');
+                const fileName = `SmartKidsInvest_Finanzanalyse_${dateStr}.pdf`;
                 
-                // Fallback auf Drucken
-                setTimeout(() => {
-                    downloadPDF();
-                }, 1000);
+                // PDF herunterladen
+                pdfDocument.save(fileName);
+                
+                // Modal schließen
+                document.getElementById('pdfModal').style.display = 'none';
+                
+                // Erfolgsmeldung anzeigen
+                showMessage('PDF erfolgreich heruntergeladen!');
             }
+        }
+        
+        // Modal schließen
+        function closeModal() {
+            document.getElementById('pdfModal').style.display = 'none';
+        }
+        
+        // Event-Listener hinzufügen, wenn das Dokument geladen ist
+        document.addEventListener('DOMContentLoaded', function() {
+            // Checkboxen initialisieren
+            const checkboxes = document.querySelectorAll('.custom-checkbox input');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Dies stellt sicher, dass der visuelle Status korrekt aktualisiert wird
+                    const checkmark = this.nextElementSibling;
+                    if (this.checked) {
+                        checkmark.style.opacity = '1';
+                    } else {
+                        checkmark.style.opacity = '0';
+                    }
+                });
+            });
+            
+            // PDF-Button-Event hinzufügen
+            document.getElementById('generatePdfBtn').addEventListener('click', generatePDF);
+            
+            // Download-Button-Event hinzufügen
+            document.getElementById('downloadPdfBtn').addEventListener('click', downloadPDF);
+            
+            // Modal schließen-Button
+            document.getElementById('closeModal').addEventListener('click', closeModal);
+            
+            // Modal schließen, wenn außerhalb geklickt wird
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('pdfModal');
+                if (event.target === modal) {
+                    closeModal();
+                }
+            });
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c778ee0052452e',t:'MTc0NjY5MTc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c78721d72fe525',t:'MTc0NjY5MjMyMS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
