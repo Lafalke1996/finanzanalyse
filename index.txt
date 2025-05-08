@@ -6,6 +6,9 @@
     <title>SmartKidsInvest - Finanzanalyse für Eltern</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF-Bibliotheken -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -428,20 +431,20 @@
             background-color: #ef4444;
         }
         
-        /* Ladeanimation */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
+        /* PDF-Container für den Download */
+        #pdfContainer {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
         }
         
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .pdf-page {
+            width: 210mm;
+            height: 297mm;
+            padding: 20mm;
+            background-color: white;
+            position: relative;
+            overflow: hidden;
         }
         
         /* Druckstile */
@@ -464,6 +467,22 @@
                 border-radius: 0;
                 page-break-after: always;
             }
+        }
+        
+        /* Ladeanimation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -916,11 +935,11 @@
                 </svg>
                 Zurück zu Seite 2
             </button>
-            <button id="printBtn" class="nav-button btn-download flex items-center" onclick="printDocument()">
+            <button id="generatePdfBtn" class="nav-button btn-download flex items-center" onclick="generatePDF()">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                 </svg>
-                Als PDF speichern
+                PDF Download
             </button>
         </div>
         
@@ -931,7 +950,22 @@
         </div>
     </div>
     
+    <!-- Container für PDF-Generierung -->
+    <div id="pdfContainer">
+        <div id="pdfPage1" class="pdf-page"></div>
+        <div id="pdfPage2" class="pdf-page"></div>
+        <div id="pdfPage3" class="pdf-page"></div>
+    </div>
+    
     <script>
+        // Warten bis das Dokument vollständig geladen ist
+        document.addEventListener('DOMContentLoaded', function() {
+            // Prüfen, ob die PDF-Bibliotheken geladen sind
+            if (typeof window.jspdf === 'undefined') {
+                window.jspdf = window.jspdf || {};
+            }
+        });
+        
         // Seiten-Navigation
         function showPage(pageNum) {
             // Alle Seiten ausblenden
@@ -977,94 +1011,258 @@
             };
         }
         
-        // Formularwerte in statischen Text umwandeln für den Druck
-        function prepareForPrint() {
-            // Kopien der Seiten erstellen
-            const page1Clone = document.getElementById('page1').cloneNode(true);
-            const page2Clone = document.getElementById('page2').cloneNode(true);
-            const page3Clone = document.getElementById('page3').cloneNode(true);
+        // Formularwerte für PDF vorbereiten
+        function prepareFormValues() {
+            // Objekt für alle Formularwerte
+            const formValues = {};
+            
+            // Textfelder und Textareas
+            const textInputs = document.querySelectorAll('input[type="text"], textarea');
+            textInputs.forEach(input => {
+                formValues[input.id] = input.value || input.placeholder;
+            });
+            
+            // Checkboxen
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(checkbox => {
+                formValues[checkbox.id] = checkbox.checked;
+            });
+            
+            return formValues;
+        }
+        
+        // PDF-Seiten vorbereiten
+        function preparePDFPages() {
+            // Formularwerte holen
+            const formValues = prepareFormValues();
+            
+            // Seite 1 vorbereiten
+            const page1 = document.getElementById('page1').cloneNode(true);
+            const pdfPage1 = document.getElementById('pdfPage1');
+            pdfPage1.innerHTML = '';
+            pdfPage1.appendChild(page1);
+            
+            // Seite 2 vorbereiten
+            const page2 = document.getElementById('page2').cloneNode(true);
+            const pdfPage2 = document.getElementById('pdfPage2');
+            pdfPage2.innerHTML = '';
+            pdfPage2.appendChild(page2);
+            
+            // Seite 3 vorbereiten
+            const page3 = document.getElementById('page3').cloneNode(true);
+            const pdfPage3 = document.getElementById('pdfPage3');
+            pdfPage3.innerHTML = '';
+            pdfPage3.appendChild(page3);
             
             // Nicht-druckbare Elemente entfernen
-            const noPrintElements = document.querySelectorAll('.no-print');
+            const noPrintElements = document.querySelectorAll('#pdfContainer .no-print');
             noPrintElements.forEach(el => {
-                el.style.display = 'none';
+                el.remove();
             });
             
-            // Alle Seiten anzeigen
-            document.getElementById('page1').style.display = 'block';
-            document.getElementById('page2').style.display = 'block';
-            document.getElementById('page3').style.display = 'block';
+            // Formularwerte in statischen Text umwandeln
+            updatePDFFormValues(pdfPage1, formValues);
+            updatePDFFormValues(pdfPage2, formValues);
+            updatePDFFormValues(pdfPage3, formValues);
             
-            return [page1Clone, page2Clone, page3Clone];
+            return [pdfPage1, pdfPage2, pdfPage3];
         }
         
-        // Seiten nach dem Druck wiederherstellen
-        function restoreAfterPrint(clones) {
-            // Nicht-druckbare Elemente wieder anzeigen
-            const noPrintElements = document.querySelectorAll('.no-print');
-            noPrintElements.forEach(el => {
-                el.style.display = '';
+        // Formularwerte in statischen Text umwandeln
+        function updatePDFFormValues(container, formValues) {
+            // Textfelder und Textareas
+            const textInputs = container.querySelectorAll('input[type="text"], textarea');
+            textInputs.forEach(input => {
+                const value = formValues[input.id] || input.placeholder;
+                const textNode = document.createElement('div');
+                textNode.textContent = value;
+                textNode.style.padding = '10px';
+                textNode.style.border = '1px solid #e2e8f0';
+                textNode.style.borderRadius = '8px';
+                textNode.style.backgroundColor = '#f8fafc';
+                input.parentNode.replaceChild(textNode, input);
             });
             
-            // Nur aktuelle Seite anzeigen
-            document.getElementById('page1').style.display = 'none';
-            document.getElementById('page2').style.display = 'none';
-            document.getElementById('page3').style.display = 'block';
+            // Checkboxen
+            const checkboxContainers = container.querySelectorAll('.checkbox-container');
+            checkboxContainers.forEach(container => {
+                const checkbox = container.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    const isChecked = formValues[checkbox.id];
+                    const checkmark = container.querySelector('.checkmark');
+                    if (checkmark) {
+                        checkmark.style.opacity = isChecked ? '1' : '0';
+                    }
+                    checkbox.style.pointerEvents = 'none';
+                }
+            });
         }
         
-        // Dokument drucken
-        function printDocument() {
-            const loadingMsg = showMessage('Druckdialog wird vorbereitet...', 0);
+        // PDF generieren und herunterladen
+        function generatePDF() {
+            // Meldung anzeigen
+            const loadingMsg = showMessage('PDF wird erstellt...', 0);
             
-            try {
-                // Für Druck vorbereiten
-                const clones = prepareForPrint();
+            // Sicherstellen, dass die jsPDF-Bibliothek geladen ist
+            if (typeof window.jspdf === 'undefined' || typeof window.jspdf.jsPDF === 'undefined') {
+                loadingMsg.update('Lade PDF-Bibliothek...');
                 
-                // Kurze Verzögerung, damit die Seiten richtig gerendert werden
-                setTimeout(() => {
-                    loadingMsg.update('Druckdialog wird geöffnet...');
+                // Versuchen, die Bibliothek erneut zu laden
+                const jsPdfScript = document.createElement('script');
+                jsPdfScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                jsPdfScript.onload = function() {
+                    const html2canvasScript = document.createElement('script');
+                    html2canvasScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+                    html2canvasScript.onload = function() {
+                        // Bibliotheken geladen, PDF erstellen
+                        setTimeout(() => {
+                            createPDF(loadingMsg);
+                        }, 500);
+                    };
+                    document.head.appendChild(html2canvasScript);
+                };
+                document.head.appendChild(jsPdfScript);
+                return;
+            }
+            
+            // PDF erstellen
+            createPDF(loadingMsg);
+        }
+        
+        // PDF erstellen und herunterladen
+        function createPDF(loadingMsg) {
+            try {
+                // PDF-Seiten vorbereiten
+                const pdfPages = preparePDFPages();
+                
+                // PDF erstellen
+                loadingMsg.update('Erstelle PDF...');
+                
+                // Einfachere Methode mit direktem Download
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF('p', 'mm', 'a4');
+                
+                // Seiten nacheinander verarbeiten
+                processPage(0);
+                
+                function processPage(index) {
+                    if (index >= pdfPages.length) {
+                        // Alle Seiten verarbeitet, PDF speichern
+                        const today = new Date();
+                        const dateStr = today.toISOString().slice(0, 10);
+                        doc.save(`SmartKidsInvest_Finanzanalyse_${dateStr}.pdf`);
+                        
+                        // Meldung aktualisieren
+                        loadingMsg.update('PDF erfolgreich erstellt!');
+                        setTimeout(() => {
+                            loadingMsg.hide();
+                        }, 2000);
+                        return;
+                    }
                     
-                    // Druckdialog öffnen
-                    window.print();
+                    // Fortschritt anzeigen
+                    loadingMsg.update(`Verarbeite Seite ${index + 1} von ${pdfPages.length}...`);
                     
-                    // Nach dem Druck zurücksetzen
-                    setTimeout(() => {
-                        restoreAfterPrint(clones);
+                    // Seite in Canvas umwandeln
+                    html2canvas(pdfPages[index], {
+                        scale: 1.5, // Höhere Qualität
+                        useCORS: true,
+                        logging: false,
+                        allowTaint: true,
+                        backgroundColor: '#ffffff'
+                    }).then(canvas => {
+                        // Canvas zu Bild konvertieren
+                        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                        
+                        // Wenn nicht die erste Seite, neue Seite hinzufügen
+                        if (index > 0) {
+                            doc.addPage();
+                        }
+                        
+                        // Bild zum PDF hinzufügen
+                        const imgWidth = 210; // A4 Breite in mm
+                        const imgHeight = canvas.height * imgWidth / canvas.width;
+                        doc.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                        
+                        // Nächste Seite verarbeiten
+                        setTimeout(() => {
+                            processPage(index + 1);
+                        }, 200);
+                    }).catch(error => {
+                        console.error('Fehler beim Konvertieren der Seite:', error);
+                        loadingMsg.update('Fehler beim Erstellen des PDFs');
                         loadingMsg.hide();
-                    }, 1000);
-                }, 500);
+                        showMessage('Fehler beim Erstellen des PDFs. Bitte versuchen Sie es erneut.', 5000, true);
+                    });
+                }
             } catch (error) {
-                console.error('Fehler beim Drucken:', error);
-                loadingMsg.update('Fehler beim Drucken');
-                setTimeout(() => {
-                    loadingMsg.hide();
-                    showMessage('Fehler beim Drucken. Bitte versuchen Sie es erneut.', 5000, true);
-                }, 1000);
+                console.error('Fehler beim Erstellen des PDFs:', error);
+                loadingMsg.update('Fehler beim Erstellen des PDFs');
+                loadingMsg.hide();
+                showMessage('Fehler beim Erstellen des PDFs. Bitte versuchen Sie es erneut.', 5000, true);
             }
         }
         
-        // Event-Listener für den Druck-Button
-        document.getElementById('printBtn').addEventListener('click', function(e) {
+        // Alternative Methode für den PDF-Download (falls die erste nicht funktioniert)
+        function downloadPDF() {
+            const loadingMsg = showMessage('PDF wird erstellt...', 0);
+            
+            try {
+                // Alle Seiten anzeigen für den Druck
+                document.getElementById('page1').style.display = 'block';
+                document.getElementById('page2').style.display = 'block';
+                document.getElementById('page3').style.display = 'block';
+                
+                // Nicht-druckbare Elemente ausblenden
+                const noPrintElements = document.querySelectorAll('.no-print');
+                noPrintElements.forEach(el => {
+                    el.style.display = 'none';
+                });
+                
+                // Druckdialog öffnen
+                loadingMsg.update('Druckdialog wird geöffnet...');
+                window.print();
+                
+                // Nach dem Druck zurücksetzen
+                setTimeout(() => {
+                    // Nicht-druckbare Elemente wieder anzeigen
+                    noPrintElements.forEach(el => {
+                        el.style.display = '';
+                    });
+                    
+                    // Nur aktuelle Seite anzeigen
+                    document.getElementById('page1').style.display = 'none';
+                    document.getElementById('page2').style.display = 'none';
+                    document.getElementById('page3').style.display = 'none';
+                    document.getElementById('page3').style.display = 'block';
+                    
+                    loadingMsg.hide();
+                }, 1000);
+            } catch (error) {
+                console.error('Fehler beim Drucken:', error);
+                loadingMsg.update('Fehler beim Erstellen des PDFs');
+                loadingMsg.hide();
+                showMessage('Fehler beim Erstellen des PDFs. Bitte versuchen Sie es erneut.', 5000, true);
+            }
+        }
+        
+        // Fallback-Methode für den Download-Button
+        document.getElementById('generatePdfBtn').addEventListener('click', function(e) {
             e.preventDefault();
-            printDocument();
-        });
-        
-        // Event-Listener für den Druck-Vorgang
-        window.addEventListener('beforeprint', function() {
-            // Zusätzliche Vorbereitung vor dem Druck
-            const textInputs = document.querySelectorAll('input[type="text"], textarea');
-            textInputs.forEach(input => {
-                // Sicherstellen, dass leere Felder den Platzhaltertext anzeigen
-                if (!input.value) {
-                    input.value = input.placeholder;
-                }
-            });
-        });
-        
-        window.addEventListener('afterprint', function() {
-            // Aufräumen nach dem Druck
-            showMessage('PDF erfolgreich erstellt!', 3000);
+            
+            // Versuche zuerst die PDF-Generierung
+            try {
+                generatePDF();
+            } catch (error) {
+                console.error('Fehler bei der PDF-Generierung, versuche Drucken:', error);
+                showMessage('PDF-Generierung nicht möglich. Öffne Druckdialog...', 3000);
+                
+                // Fallback auf Drucken
+                setTimeout(() => {
+                    downloadPDF();
+                }, 1000);
+            }
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c76b4214036a76',t:'MTc0NjY5MTE4MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c778ee0052452e',t:'MTc0NjY5MTc0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
