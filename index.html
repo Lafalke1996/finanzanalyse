@@ -1,15 +1,17 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SmartKidsInvest - Finanzanalyse für Eltern</title>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- PDF-Generierung Bibliotheken -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Finanzanalyse für Eltern</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+@page {
+    margin: 20mm;
+}
+
         body {
             font-family: 'Nunito', sans-serif;
             background-color: #f8fafc;
@@ -24,8 +26,33 @@
             background-color: white;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
             position: relative;
-            border-radius: 16px;
-            overflow: hidden;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .page {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 20mm;
+                box-shadow: none;
+                page-break-after: always;
+                min-height: auto;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            /* Platzhalter ausblenden */
+            input::placeholder, textarea::placeholder {
+                color: transparent !important;
+            }
         }
         
         h1 {
@@ -402,844 +429,496 @@
             background: rgba(255, 255, 255, 0.1);
             z-index: 1;
         }
-        
-        /* Meldung-Stil */
-        .message {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: #10b981;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 50px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .message.show {
-            opacity: 1;
-        }
-        
-        /* Ladeanimation */
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255,255,255,.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        /* Fortschrittsanzeige */
-        .progress-container {
-            width: 100%;
-            background-color: #e2e8f0;
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
-        
-        .progress-bar {
-            height: 10px;
-            background: linear-gradient(90deg, #10b981, #34d399);
-            border-radius: 10px;
-            transition: width 0.3s ease;
-            width: 0%;
-        }
-        
-        /* Modal für PDF-Download */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .modal.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        .modal-content {
-            background-color: white;
-            border-radius: 16px;
-            padding: 30px;
-            width: 90%;
-            max-width: 500px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            transform: translateY(20px);
-            transition: all 0.3s ease;
-        }
-        
-        .modal.show .modal-content {
-            transform: translateY(0);
-        }
-        
-        .modal-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #4f46e5;
-        }
-        
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #64748b;
-            transition: color 0.2s;
-        }
-        
-        .modal-close:hover {
-            color: #334155;
-        }
-        
-        .modal-body {
-            margin-bottom: 20px;
-        }
-        
-        .modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-        
-        /* PDF-Download-Button */
-        .pdf-download-btn {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            background: linear-gradient(135deg, #ef4444, #f87171);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 12px 24px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            width: 100%;
-            margin-top: 20px;
-        }
-        
-        .pdf-download-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-        
-        .pdf-download-btn:active {
-            transform: translateY(0);
-        }
-        
-        .pdf-download-btn svg {
-            width: 24px;
-            height: 24px;
-        }
-        
-        .pdf-download-btn.loading {
-            background: linear-gradient(135deg, #9ca3af, #d1d5db);
-            cursor: not-allowed;
-        }
-        
-        /* Erfolgs-Animation */
-        .success-checkmark {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            position: relative;
-        }
-        
-        .success-checkmark .check-icon {
-            width: 80px;
-            height: 80px;
-            position: relative;
-            border-radius: 50%;
-            box-sizing: content-box;
-            border: 4px solid #10b981;
-        }
-        
-        .success-checkmark .check-icon::before {
-            top: 3px;
-            left: -2px;
-            width: 30px;
-            transform-origin: 100% 50%;
-            border-radius: 100px 0 0 100px;
-        }
-        
-        .success-checkmark .check-icon::after {
-            top: 0;
-            left: 30px;
-            width: 60px;
-            transform-origin: 0 50%;
-            border-radius: 0 100px 100px 0;
-            animation: rotate-circle 4.25s ease-in;
-        }
-        
-        .success-checkmark .check-icon::before, .success-checkmark .check-icon::after {
-            content: '';
-            height: 100px;
-            position: absolute;
-            background: #FFFFFF;
-            transform: rotate(-45deg);
-        }
-        
-        .success-checkmark .check-icon .icon-line {
-            height: 5px;
-            background-color: #10b981;
-            display: block;
-            border-radius: 2px;
-            position: absolute;
-            z-index: 10;
-        }
-        
-        .success-checkmark .check-icon .icon-line.line-tip {
-            top: 46px;
-            left: 14px;
-            width: 25px;
-            transform: rotate(45deg);
-            animation: icon-line-tip 0.75s;
-        }
-        
-        .success-checkmark .check-icon .icon-line.line-long {
-            top: 38px;
-            right: 8px;
-            width: 47px;
-            transform: rotate(-45deg);
-            animation: icon-line-long 0.75s;
-        }
-        
-        .success-checkmark .check-icon .icon-circle {
-            top: -4px;
-            left: -4px;
-            z-index: 10;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            position: absolute;
-            box-sizing: content-box;
-            border: 4px solid rgba(16, 185, 129, 0.2);
-        }
-        
-        .success-checkmark .check-icon .icon-fix {
-            top: 8px;
-            width: 5px;
-            left: 26px;
-            z-index: 1;
-            height: 85px;
-            position: absolute;
-            transform: rotate(-45deg);
-            background-color: #FFFFFF;
-        }
-        
-        @keyframes rotate-circle {
-            0% {
-                transform: rotate(-45deg);
-            }
-            5% {
-                transform: rotate(-45deg);
-            }
-            12% {
-                transform: rotate(-405deg);
-            }
-            100% {
-                transform: rotate(-405deg);
-            }
-        }
-        
-        @keyframes icon-line-tip {
-            0% {
-                width: 0;
-                left: 1px;
-                top: 19px;
-            }
-            54% {
-                width: 0;
-                left: 1px;
-                top: 19px;
-            }
-            70% {
-                width: 50px;
-                left: -8px;
-                top: 37px;
-            }
-            84% {
-                width: 17px;
-                left: 21px;
-                top: 48px;
-            }
-            100% {
-                width: 25px;
-                left: 14px;
-                top: 46px;
-            }
-        }
-        
-        @keyframes icon-line-long {
-            0% {
-                width: 0;
-                right: 46px;
-                top: 54px;
-            }
-            65% {
-                width: 0;
-                right: 46px;
-                top: 54px;
-            }
-            84% {
-                width: 55px;
-                right: 0px;
-                top: 35px;
-            }
-            100% {
-                width: 47px;
-                right: 8px;
-                top: 38px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Meldung für Statusanzeigen -->
-    <div id="message" class="message">
-        <div class="loading-spinner" id="messageSpinner"></div>
-        <span id="messageText">Seiten werden vorbereitet...</span>
-    </div>
     
-    <!-- PDF-Download-Modal -->
-    <div id="pdfModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">PDF-Download</h3>
-                <button class="modal-close" id="closeModal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <div id="pdfProcessing">
-                    <p class="text-center mb-4">Ihr PDF wird vorbereitet...</p>
-                    <div class="progress-container">
-                        <div class="progress-bar" id="pdfProgressBar"></div>
-                    </div>
-                </div>
-                <div id="pdfSuccess" style="display: none;">
-                    <div class="success-checkmark">
-                        <div class="check-icon">
-                            <span class="icon-line line-tip"></span>
-                            <span class="icon-line line-long"></span>
-                            <div class="icon-circle"></div>
-                            <div class="icon-fix"></div>
-                        </div>
-                    </div>
-                    <p class="text-center text-lg font-bold text-green-600">PDF erfolgreich erstellt!</p>
-                    <p class="text-center text-gray-600 mt-2">Ihr PDF wurde erfolgreich erstellt und wird automatisch heruntergeladen.</p>
-                </div>
-                <div id="pdfError" style="display: none;">
-                    <div class="text-center text-red-500 mb-4">
-                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <p class="text-center text-lg font-bold text-red-600">Fehler beim Erstellen des PDFs</p>
-                    <p class="text-center text-gray-600 mt-2" id="errorMessage">Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.</p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button id="tryAgainBtn" class="nav-button btn-primary" style="display: none;">Erneut versuchen</button>
-                <button id="downloadAgainBtn" class="nav-button btn-download" style="display: none;">Erneut herunterladen</button>
-                <button id="closeSuccessBtn" class="nav-button btn-secondary" style="display: none;">Schließen</button>
-            </div>
-        </div>
-    </div>
+@media print {
+    body {
+        margin: 0 !important;
+        padding: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        zoom: 0.95;
+    }
+    .page {
+        margin: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        page-break-after: always;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+@media print {
+    body {
+        zoom: 0.92; /* Scale down to fit within A4 pages */
+        margin: 0 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
 
-    <div id="page1" class="page">
-        <div class="page-background">
-            <div class="color-blob blob-1"></div>
-            <div class="color-blob blob-2"></div>
-            <div class="color-blob blob-3"></div>
-            <div class="color-blob blob-4"></div>
-        </div>
-        
-        <div class="family-header">
-            <div class="header-content">
-                <h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
-                <p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
-            </div>
-            <div class="header-decoration-1"></div>
-            <div class="header-decoration-2"></div>
-        </div>
-        
-        <h2 class="text-xl mb-6 flex items-center">
-            <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
-            Persönliche Angaben & Erwartungen
+    .page {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 0;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+        overflow: visible !important;
+        page-break-after: always;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    .page:last-child {
+        page-break-after: auto;
+    }
+
+    
+}
+</style><style>
+@media print {
+    .page {
+        page-break-before: always;
+        page-break-after: always;
+        page-break-inside: avoid;
+    }
+
+    .section {
+        page-break-inside: avoid;
+    }
+
+    table, tr, td, th {
+        page-break-inside: avoid !important;
+    }
+
+    .page-indicator,
+    .page-nav,
+    .message,
+    .modal {
+        display: none !important;
+    }
+
+    body {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+}
+</style></head>
+<body>
+<div class="page" id="page1">
+<div class="page-background">
+<div class="color-blob blob-1"></div>
+<div class="color-blob blob-2"></div>
+<div class="color-blob blob-3"></div>
+<div class="color-blob blob-4"></div>
+</div>
+<div class="family-header">
+<div class="header-content">
+<h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
+<p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
+</div>
+<div class="header-decoration-1"></div>
+<div class="header-decoration-2"></div>
+</div>
+<h2 class="text-xl mb-6 flex items-center">
+<svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            Persönliche Angaben &amp; Erwartungen
         </h2>
-        
-        <div class="section section-purple">
-            <div class="mb-4">
-                <div class="section-title" style="color: #8b5cf6;">
-                    <div class="section-number" style="background-color: #8b5cf6;">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                        </svg>
-                    </div>
+<div class="section section-purple">
+<div class="mb-4">
+<div class="section-title" style="color: #8b5cf6;">
+<div class="section-number" style="background-color: #8b5cf6;">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
                     Dein Name
                 </div>
-                <input type="text" id="name" class="w-full" style="border-color: #c4b5fd;">
-            </div>
-            
-            <div class="mb-4">
-                <div class="section-title" style="color: #8b5cf6;">
-                    <div class="section-number" style="background-color: #8b5cf6;">1</div>
+<input class="w-full" id="name" placeholder="Vor- und Nachname" style="border-color: #c4b5fd;" type="text"/>
+</div>
+<div class="mb-4">
+<div class="section-title" style="color: #8b5cf6;">
+<div class="section-number" style="background-color: #8b5cf6;">1</div>
                     Wie viele Kinder hast Du – und wie heißen sie? (inkl. Geburtsdaten)
                 </div>
-                <textarea id="children" rows="3" class="w-full" style="border-color: #c4b5fd;"></textarea>
-            </div>
-        </div>
-        
-        <div class="section section-orange">
-            <div class="mb-4">
-                <div class="section-title" style="color: #f97316;">
-                    <div class="section-number" style="background-color: #f97316;">2</div>
+<textarea class="w-full" id="children" placeholder="z.B. Max (01.01.2015), Emma (15.06.2018)" rows="3" style="border-color: #c4b5fd;"></textarea>
+</div>
+</div>
+<div class="section section-orange">
+<div class="mb-4">
+<div class="section-title" style="color: #f97316;">
+<div class="section-number" style="background-color: #f97316;">2</div>
                     Was erwartest Du von einer guten Kindervorsorge?
                 </div>
-                <textarea id="expectations" rows="2" class="w-full" style="border-color: #fdba74;"></textarea>
-            </div>
-            
-            <div class="mb-4">
-                <div class="section-title" style="color: #f97316;">
-                    <div class="section-number" style="background-color: #f97316;">3</div>
+<textarea class="w-full" id="expectations" placeholder="Deine Erwartungen an eine gute Kindervorsorge" rows="2" style="border-color: #fdba74;"></textarea>
+</div>
+<div class="mb-4">
+<div class="section-title" style="color: #f97316;">
+<div class="section-number" style="background-color: #f97316;">3</div>
                     Welche Erfahrungen hast Du bisher mit Geldanlage oder Absicherung für Dein(e) Kind(er) gemacht?
                 </div>
-                <textarea id="experience" rows="2" class="w-full" style="border-color: #fdba74;"></textarea>
-            </div>
-        </div>
-        
-        <div class="page-nav no-print">
-            <div></div>
-            <button class="nav-button btn-primary flex items-center" onclick="showPage(2)">
+<textarea class="w-full" id="experience" placeholder="Deine bisherigen Erfahrungen" rows="2" style="border-color: #fdba74;"></textarea>
+</div>
+</div>
+<div class="page-nav no-print">
+<div></div>
+<button class="nav-button btn-primary flex items-center" onclick="showPage(2)">
                 Weiter zu Seite 2
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </button>
-        </div>
-        
-        <div class="page-indicator no-print">
-            <span class="dot-indicator dot-active"></span>
-            <span class="dot-indicator dot-inactive"></span>
-            <span class="dot-indicator dot-inactive"></span>
-        </div>
-    </div>
-    
-    <div id="page2" class="page" style="display: none;">
-        <div class="page-background">
-            <div class="color-blob blob-1"></div>
-            <div class="color-blob blob-2"></div>
-            <div class="color-blob blob-3"></div>
-            <div class="color-blob blob-4"></div>
-        </div>
-        
-        <div class="family-header">
-            <div class="header-content">
-                <h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
-                <p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
-            </div>
-            <div class="header-decoration-1"></div>
-            <div class="header-decoration-2"></div>
-        </div>
-        
-        <h2 class="text-xl mb-6 flex items-center" style="color: #8b5cf6;">
-            <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-            </svg>
-            Ziele & Prioritäten
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<div class="page-indicator no-print">
+<span class="dot-indicator dot-active"></span>
+<span class="dot-indicator dot-inactive"></span>
+<span class="dot-indicator dot-inactive"></span>
+</div>
+</div>
+<div class="page" id="page2" style="display: none;">
+<div class="page-background">
+<div class="color-blob blob-1"></div>
+<div class="color-blob blob-2"></div>
+<div class="color-blob blob-3"></div>
+<div class="color-blob blob-4"></div>
+</div>
+<div class="family-header">
+<div class="header-content">
+<h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
+<p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
+</div>
+<div class="header-decoration-1"></div>
+<div class="header-decoration-2"></div>
+</div>
+<h2 class="text-xl mb-6 flex items-center" style="color: #8b5cf6;">
+<svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            Ziele &amp; Prioritäten
         </h2>
-        
-        <div class="section section-green">
-            <div class="section-title" style="color: #10b981;">
-                <div class="section-number" style="background-color: #10b981;">4</div>
+<div class="section section-green">
+<div class="section-title" style="color: #10b981;">
+<div class="section-number" style="background-color: #10b981;">4</div>
                 Ziele für Dein(e) Kind(er)
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #10b981;">
-                        <input type="checkbox" id="goal1">
-                        <div class="checkmark" style="background-color: #10b981;"></div>
-                    </div>
-                    <div class="checkbox-label">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                        </svg>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #10b981;">
+<input id="goal1" type="checkbox"/>
+<div class="checkmark" style="background-color: #10b981;"></div>
+</div>
+<div class="checkbox-label">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                         Vermögen für Ausbildung / Studium aufbauen
                     </div>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #10b981;">
-                        <input type="checkbox" id="goal2">
-                        <div class="checkmark" style="background-color: #10b981;"></div>
-                    </div>
-                    <div class="checkbox-label">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #10b981;">
+<input id="goal2" type="checkbox"/>
+<div class="checkmark" style="background-color: #10b981;"></div>
+</div>
+<div class="checkbox-label">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                         Startkapital ansparen
                     </div>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #10b981;">
-                        <input type="checkbox" id="goal3">
-                        <div class="checkmark" style="background-color: #10b981;"></div>
-                    </div>
-                    <div class="checkbox-label">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                        </svg>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #10b981;">
+<input id="goal3" type="checkbox"/>
+<div class="checkmark" style="background-color: #10b981;"></div>
+</div>
+<div class="checkbox-label">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                         Erste eigene Immobilie erwerben
                     </div>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #10b981;">
-                        <input type="checkbox" id="goal4">
-                        <div class="checkmark" style="background-color: #10b981;"></div>
-                    </div>
-                    <div class="checkbox-label">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
-                        </svg>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #10b981;">
+<input id="goal4" type="checkbox"/>
+<div class="checkmark" style="background-color: #10b981;"></div>
+</div>
+<div class="checkbox-label">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M11 17l-5-5m0 0l5-5m-5 5h12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                         Flexible Rücklagen für Zwischenziele
                     </div>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #10b981;">
-                        <input type="checkbox" id="goal5">
-                        <div class="checkmark" style="background-color: #10b981;"></div>
-                    </div>
-                    <div class="checkbox-label">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                        </svg>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #10b981;">
+<input id="goal5" type="checkbox"/>
+<div class="checkmark" style="background-color: #10b981;"></div>
+</div>
+<div class="checkbox-label">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                         Schutz bei Unfall oder Krankheit
                     </div>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #10b981;">
-                        <input type="checkbox" id="goal6">
-                        <div class="checkmark" style="background-color: #10b981;"></div>
-                    </div>
-                    <div class="checkbox-label">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                        </svg>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #10b981;">
+<input id="goal6" type="checkbox"/>
+<div class="checkmark" style="background-color: #10b981;"></div>
+</div>
+<div class="checkbox-label">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                         Langfristige finanzielle Sicherheit aufbauen
                     </div>
-                </label>
-            </div>
-        </div>
-        
-        <div class="section section-orange">
-            <div class="section-title" style="color: #f97316;">
-                <div class="section-number" style="background-color: #f97316;">5</div>
+</label>
+</div>
+</div>
+<div class="section section-orange">
+<div class="section-title" style="color: #f97316;">
+<div class="section-number" style="background-color: #f97316;">5</div>
                 Das ist mir besonders wichtig
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="prio1">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Hohe Rendite</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="prio2">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Flexibilität (Geld jederzeit verfügbar)</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="prio3">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Kontrolle mit 18 beim Kind</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="prio4">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Steuervorteile nutzen</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="prio5">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Staatliche Zulagen sichern</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="prio6">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Gesundheitliche Risiken absichern</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="prio7">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Vorhandene Finanzprodukte optimieren</span>
-                </label>
-            </div>
-        </div>
-        
-        <div class="page-nav no-print">
-            <button class="nav-button btn-secondary flex items-center" onclick="showPage(1)">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="prio1" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Hohe Rendite</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="prio2" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Flexibilität (Geld jederzeit verfügbar)</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="prio3" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Kontrolle mit 18 beim Kind</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="prio4" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Steuervorteile nutzen</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="prio5" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Staatliche Zulagen sichern</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="prio6" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Gesundheitliche Risiken absichern</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="prio7" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Vorhandene Finanzprodukte optimieren</span>
+</label>
+</div>
+</div>
+<div class="page-nav no-print">
+<button class="nav-button btn-secondary flex items-center" onclick="showPage(1)">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                 Zurück zu Seite 1
             </button>
-            <button class="nav-button btn-primary flex items-center" onclick="showPage(3)">
+<button class="nav-button btn-primary flex items-center" onclick="showPage(3)">
                 Weiter zu Seite 3
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                </svg>
-            </button>
-        </div>
-        
-        <div class="page-indicator no-print">
-            <span class="dot-indicator dot-inactive"></span>
-            <span class="dot-indicator dot-active"></span>
-            <span class="dot-indicator dot-inactive"></span>
-        </div>
-    </div>
-    
-    <div id="page3" class="page" style="display: none;">
-        <div class="page-background">
-            <div class="color-blob blob-1"></div>
-            <div class="color-blob blob-2"></div>
-            <div class="color-blob blob-3"></div>
-            <div class="color-blob blob-4"></div>
-        </div>
-        
-        <div class="family-header">
-            <div class="header-content">
-                <h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
-                <p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
-            </div>
-            <div class="header-decoration-1"></div>
-            <div class="header-decoration-2"></div>
-        </div>
-        
-        <h2 class="text-xl mb-6 flex items-center" style="color: #10b981;">
-            <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-            </svg>
-            Finanzielle Planung & Absicherung
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</button>
+</div>
+<div class="page-indicator no-print">
+<span class="dot-indicator dot-inactive"></span>
+<span class="dot-indicator dot-active"></span>
+<span class="dot-indicator dot-inactive"></span>
+</div>
+</div>
+<div class="page" id="page3" style="display: none;">
+<div class="page-background">
+<div class="color-blob blob-1"></div>
+<div class="color-blob blob-2"></div>
+<div class="color-blob blob-3"></div>
+<div class="color-blob blob-4"></div>
+</div>
+<div class="family-header">
+<div class="header-content">
+<h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
+<p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
+</div>
+<div class="header-decoration-1"></div>
+<div class="header-decoration-2"></div>
+</div>
+<h2 class="text-xl mb-4 flex items-center" style="color: #10b981;">
+<svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+            Finanzielle Planung &amp; Absicherung
         </h2>
-        
-        <div class="section section-purple">
-            <div class="section-title" style="color: #8b5cf6;">
-                <div class="section-number" style="background-color: #8b5cf6;">6</div>
+<div class="section section-purple">
+<div class="section-title" style="color: #8b5cf6;">
+<div class="section-number" style="background-color: #8b5cf6;">6</div>
                 Finanzielle Eingaben
             </div>
-            
-            <div class="mb-3">
-                <label class="block mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                    </svg>
+<div class="mb-3">
+<label class="block mb-1 flex items-center">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                     Verfügbares Budget für Kindervorsorge
                 </label>
-                <input type="text" id="budget" class="w-full" placeholder="z.B. 100€ monatlich" style="border-color: #c4b5fd;">
-            </div>
-            
-            <div class="mb-3">
-                <label class="block mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
-                    </svg>
+<input class="w-full" id="budget" placeholder="z.B. 100€ monatlich" style="border-color: #c4b5fd;" type="text"/>
+</div>
+<div class="mb-3">
+<label class="block mb-1 flex items-center">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                     Bereits vorhandene Rücklagen fürs Kind
                 </label>
-                <input type="text" id="savings" class="w-full" placeholder="z.B. 1.000€" style="border-color: #c4b5fd;">
-            </div>
-            
-            <div class="mb-3">
-                <label class="block mb-2 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+<input class="w-full" id="savings" placeholder="z.B. 1.000€" style="border-color: #c4b5fd;" type="text"/>
+</div>
+<div class="mb-3">
+<label class="block mb-1 flex items-center">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                     Bis zu welchem Alter planst Du das Investment?
                 </label>
-                <input type="text" id="investmentAge" class="w-full" placeholder="z.B. 18 Jahre oder 25 Jahre" style="border-color: #c4b5fd;">
+<input class="w-full" id="investmentAge" placeholder="z.B. 18 Jahre oder 25 Jahre" style="border-color: #c4b5fd;" type="text"/>
+</div>
+</div>
+<div class="section section-green">
+<div class="section-title" style="color: #10b981;">
+<div class="section-number" style="background-color: #10b981;">7</div>
+                Kapitalbedarf nach Ziel &amp; Zeitpunkt
             </div>
-        </div>
-        
-        <div class="section section-green">
-            <div class="section-title" style="color: #10b981;">
-                <div class="section-number" style="background-color: #10b981;">7</div>
-                Kapitalbedarf nach Ziel & Zeitpunkt
-            </div>
-            
-            <div class="overflow-x-auto">
-                <table class="w-full mb-4 rounded-lg overflow-hidden">
-                    <thead>
-                        <tr>
-                            <th style="background-color: #d1fae5; color: #10b981;">Ziel</th>
-                            <th style="background-color: #d1fae5; color: #10b981;">Alter</th>
-                            <th style="background-color: #d1fae5; color: #10b981;">Kapitalbedarf</th>
-                            <th style="background-color: #d1fae5; color: #10b981;">Priorität (1–5)</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><input type="text" class="w-full border-0" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="18" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="2.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="2" style="border-color: #6ee7b7;"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" class="w-full border-0" placeholder="z.B. Studium" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="19-25" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="30.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="1" style="border-color: #6ee7b7;"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" class="w-full border-0" placeholder="z.B. Auslandsjahr" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="20" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="10.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="3" style="border-color: #6ee7b7;"></td>
-                        </tr>
-                        <tr>
-                            <td><input type="text" class="w-full border-0" placeholder="z.B. Eigenheim" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="30" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="50.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" class="w-full border-0" placeholder="4" style="border-color: #6ee7b7;"></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="section section-orange">
-            <div class="section-title" style="color: #f97316;">
-                <div class="section-number" style="background-color: #f97316;">8</div>
+<div class="overflow-x-auto">
+<table class="w-full mb-4 rounded-lg overflow-hidden">
+<thead>
+<tr>
+<th style="background-color: #d1fae5; color: #10b981;">Ziel</th>
+<th style="background-color: #d1fae5; color: #10b981;">Alter</th>
+<th style="background-color: #d1fae5; color: #10b981;">Kapitalbedarf</th>
+<th style="background-color: #d1fae5; color: #10b981;">Priorität (1–5)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><input class="w-full border-0" id="goal_1_name" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" id="goal_1_age" placeholder="18" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" id="goal_1_capital" placeholder="2.000€" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" id="goal_1_priority" placeholder="2" style="border-color: #6ee7b7;" type="text"/></td>
+</tr>
+<tr>
+<td><input class="w-full border-0" id="goal_2_name" placeholder="z.B. Studium" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" id="goal_2_age" placeholder="19-25" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" id="goal_2_capital" placeholder="30.000€" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" id="goal_2_priority" placeholder="1" style="border-color: #6ee7b7;" type="text"/></td>
+</tr>
+<tr>
+<td><input class="w-full border-0" placeholder="z.B. Weltreise" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" placeholder="28" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" placeholder="15.000€" style="border-color: #6ee7b7;" type="text"/></td>
+<td><input class="w-full border-0" placeholder="5" style="border-color: #6ee7b7;" type="text"/></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="section section-orange">
+<div class="section-title" style="color: #f97316;">
+<div class="section-number" style="background-color: #f97316;">8</div>
                 Bestehende Absicherung
             </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="insurance1">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Kinderinvaliditätsversicherung</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="insurance2">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Unfallversicherung für das Kind</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="insurance3">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Krankenzusatzversicherung</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="insurance4">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Risikolebensversicherung der Eltern</span>
-                </label>
-                
-                <label class="checkbox-container">
-                    <div class="custom-checkbox" style="border-color: #f97316;">
-                        <input type="checkbox" id="insurance5">
-                        <div class="checkmark" style="background-color: #f97316;"></div>
-                    </div>
-                    <span>Vorsorgevollmacht & Patientenverfügung</span>
-                </label>
-            </div>
-        </div>
-        
-        <div class="page-nav no-print">
-            <button class="nav-button btn-secondary flex items-center" onclick="showPage(2)">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                </svg>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="insurance1" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Kinderinvaliditätsversicherung</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="insurance2" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Unfallversicherung für das Kind</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="insurance3" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Krankenzusatzversicherung</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="insurance4" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Risikolebensversicherung der Eltern</span>
+</label>
+<label class="checkbox-container">
+<div class="custom-checkbox" style="border-color: #f97316;">
+<input id="insurance5" type="checkbox"/>
+<div class="checkmark" style="background-color: #f97316;"></div>
+</div>
+<span>Vorsorgevollmacht &amp; Patientenverfügung</span>
+</label>
+</div>
+</div>
+<div class="page-nav no-print">
+<button class="nav-button btn-secondary flex items-center" onclick="showPage(2)">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
                 Zurück zu Seite 2
             </button>
-            <button id="generatePdfBtn" class="nav-button btn-download flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                </svg>
-                PDF herunterladen
+<button class="nav-button btn-download flex items-center" id="downloadPdfBtn" onclick="printDocument()">
+<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+                Als PDF speichern
             </button>
-        </div>
-        
-        <div class="page-indicator no-print">
-            <span class="dot-indicator dot-inactive"></span>
-            <span class="dot-indicator dot-inactive"></span>
-            <span class="dot-indicator dot-active"></span>
-        </div>
-    </div>
-    
-    <script>
-        // Globale Variablen
-        let pdfDoc = null;
-        let pdfDataUrl = null;
-        
+</div>
+<div class="page-indicator no-print">
+<span class="dot-indicator dot-inactive"></span>
+<span class="dot-indicator dot-inactive"></span>
+<span class="dot-indicator dot-active"></span>
+</div>
+</div>
+<script>
         // Seiten-Navigation
         function showPage(pageNum) {
             // Alle Seiten ausblenden
@@ -1254,200 +933,68 @@
             window.scrollTo(0, 0);
         }
         
-        // Meldung anzeigen
-        function showMessage(text, showSpinner = false, duration = 3000) {
-            const message = document.getElementById('message');
-            const messageText = document.getElementById('messageText');
-            const spinner = document.getElementById('messageSpinner');
+        // Formularwerte in statischen Text umwandeln für den Druck
+        function prepareForPrint() {
+            // Alle Seiten anzeigen
+            document.getElementById('page1').style.display = 'block';
+            document.getElementById('page2').style.display = 'block';
+            document.getElementById('page3').style.display = 'block';
             
-            messageText.textContent = text;
-            
-            if (showSpinner) {
-                spinner.style.display = 'inline-block';
-            } else {
-                spinner.style.display = 'none';
-            }
-            
-            message.classList.add('show');
-            
-            if (duration > 0) {
-                setTimeout(() => {
-                    message.classList.remove('show');
-                }, duration);
-            }
-            
-            return {
-                hide: () => {
-                    message.classList.remove('show');
-                },
-                update: (newText) => {
-                    messageText.textContent = newText;
-                }
-            };
+            // Nicht-druckbare Elemente ausblenden
+            const noPrintElements = document.querySelectorAll('.no-print');
+            noPrintElements.forEach(el => {
+                el.style.display = 'none';
+            });
         }
         
-        // Fortschrittsbalken aktualisieren
-        function updateProgress(percent) {
-            const progressBar = document.getElementById('pdfProgressBar');
-            progressBar.style.width = percent + '%';
+        // Seiten nach dem Druck wiederherstellen
+        function restoreAfterPrint() {
+            // Nicht-druckbare Elemente wieder anzeigen
+            const noPrintElements = document.querySelectorAll('.no-print');
+            noPrintElements.forEach(el => {
+                el.style.display = '';
+            });
+            
+            // Nur aktuelle Seite anzeigen
+            document.getElementById('page1').style.display = 'none';
+            document.getElementById('page2').style.display = 'none';
+            document.getElementById('page3').style.display = 'block';
         }
         
-        // Modal anzeigen
-        function showModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.add('show');
+        // PDF-Druck-Funktion
+        function printDocument() {
+            // Für Druck vorbereiten
+            prepareForPrint();
+            
+            // Druckdialog öffnen
+            window.print();
+            
+            // Nach dem Drucken wiederherstellen
+            setTimeout(() => {
+                restoreAfterPrint();
+            }, 1000);
         }
         
-        // Modal ausblenden
-        function hideModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('show');
-        }
-        
-        // PDF-Generierung
-        async function generatePDF() {
-            // Modal anzeigen
-            showModal('pdfModal');
-            
-            // Verarbeitungsansicht anzeigen
-            document.getElementById('pdfProcessing').style.display = 'block';
-            document.getElementById('pdfSuccess').style.display = 'none';
-            document.getElementById('pdfError').style.display = 'none';
-            document.getElementById('tryAgainBtn').style.display = 'none';
-            document.getElementById('downloadAgainBtn').style.display = 'none';
-            document.getElementById('closeSuccessBtn').style.display = 'none';
-            
-            // Fortschritt zurücksetzen
-            updateProgress(0);
-            
-            try {
-                // jsPDF initialisieren
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                
-                // Für jede Seite
-                for (let i = 1; i <= 3; i++) {
-                    // Fortschritt aktualisieren
-                    updateProgress((i - 1) * 30);
-                    
-                    // Seite sichtbar machen für die Konvertierung
-                    const page = document.getElementById('page' + i);
-                    const originalDisplay = page.style.display;
-                    page.style.display = 'block';
-                    
-                    // Navigations- und Indikatorelemente temporär ausblenden
-                    const navElements = page.querySelectorAll('.no-print');
-                    navElements.forEach(el => {
-                        el.style.display = 'none';
-                    });
-                    
-                    // Warten, damit die Seite vollständig gerendert wird
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                    
-                    // Seite in Canvas umwandeln
-                    const canvas = await html2canvas(page, {
-                        scale: 2, // Höhere Qualität
-                        useCORS: true,
-                        logging: false,
-                        backgroundColor: '#ffffff'
-                    });
-                    
-                    // Canvas in PDF einfügen
-                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
-                    const imgWidth = 210; // A4 Breite in mm
-                    const imgHeight = canvas.height * imgWidth / canvas.width;
-                    
-                    // Nicht die erste Seite? Dann neue Seite hinzufügen
-                    if (i > 1) {
-                        pdf.addPage();
-                    }
-                    
-                    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
-                    
-                    // Fortschritt aktualisieren
-                    updateProgress(i * 30);
-                    
-                    // Ursprünglichen Zustand wiederherstellen
-                    page.style.display = originalDisplay;
-                    navElements.forEach(el => {
-                        el.style.display = '';
-                    });
-                }
-                
-                // PDF als Blob speichern
-                const pdfBlob = pdf.output('blob');
-                pdfDataUrl = URL.createObjectURL(pdfBlob);
-                
-                // Fortschritt abschließen
-                updateProgress(100);
-                
-                // Erfolgsansicht anzeigen
-                document.getElementById('pdfProcessing').style.display = 'none';
-                document.getElementById('pdfSuccess').style.display = 'block';
-                document.getElementById('downloadAgainBtn').style.display = 'block';
-                document.getElementById('closeSuccessBtn').style.display = 'block';
-                
-                // PDF automatisch herunterladen
-                downloadPDF();
-                
-            } catch (error) {
-                console.error('Fehler bei der PDF-Generierung:', error);
-                
-                // Fehleransicht anzeigen
-                document.getElementById('pdfProcessing').style.display = 'none';
-                document.getElementById('pdfError').style.display = 'block';
-                document.getElementById('errorMessage').textContent = 'Ein Fehler ist aufgetreten: ' + error.message;
-                document.getElementById('tryAgainBtn').style.display = 'block';
-                document.getElementById('closeSuccessBtn').style.display = 'block';
-            }
-        }
-        
-        // PDF herunterladen
-        function downloadPDF() {
-            if (!pdfDataUrl) {
-                showMessage('Fehler: PDF wurde nicht erstellt.', false, 3000);
-                return;
-            }
-            
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('de-DE').replace(/\./g, '-');
-            const fileName = `SmartKidsInvest_Finanzanalyse_${dateStr}.pdf`;
-            
-            const link = document.createElement('a');
-            link.href = pdfDataUrl;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showMessage('PDF wurde heruntergeladen!', false, 3000);
-        }
-        
-        // Event-Listener hinzufügen, wenn das Dokument geladen ist
+        // Initialisierung
         document.addEventListener('DOMContentLoaded', function() {
             // Checkboxen initialisieren
-            const checkboxes = document.querySelectorAll('.custom-checkbox input');
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
             checkboxes.forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
-                    // Dies stellt sicher, dass der visuelle Status korrekt aktualisiert wird
-                    const checkmark = this.nextElementSibling;
                     if (this.checked) {
-                        checkmark.style.opacity = '1';
+                        this.parentElement.querySelector('.checkmark').style.opacity = '1';
                     } else {
-                        checkmark.style.opacity = '0';
+                        this.parentElement.querySelector('.checkmark').style.opacity = '0';
                     }
                 });
             });
             
-            // PDF-Generierungs-Button-Event hinzufügen
-            document.getElementById('generatePdfBtn').addEventListener('click', generatePDF);
+            // Beim Drucken vorbereiten
+            window.addEventListener('beforeprint', prepareForPrint);
             
-            // Modal-Buttons
-            document.getElementById('closeModal').addEventListener('click', () => hideModal('pdfModal'));
-            document.getElementById('closeSuccessBtn').addEventListener('click', () => hideModal('pdfModal'));
-            document.getElementById('tryAgainBtn').addEventListener('click', generatePDF);
-            document.getElementById('downloadAgainBtn').addEventListener('click', downloadPDF);
+            // Nach dem Drucken wiederherstellen
+            window.addEventListener('afterprint', restoreAfterPrint);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c78e4912a6e50a',t:'MTc0NjY5MjYxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c7c443e1b3e52e',t:'MTc0NjY5NDgyNi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
