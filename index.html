@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -7,6 +6,9 @@
     <title>SmartKidsInvest - Finanzanalyse für Eltern</title>
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF-Generierung Bibliotheken -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
             font-family: 'Nunito', sans-serif;
@@ -425,10 +427,6 @@
             opacity: 1;
         }
         
-        .message.error {
-            background-color: #ef4444;
-        }
-        
         /* Ladeanimation */
         .loading-spinner {
             display: inline-block;
@@ -445,7 +443,24 @@
             to { transform: rotate(360deg); }
         }
         
-        /* Modal für Textvorschau */
+        /* Fortschrittsanzeige */
+        .progress-container {
+            width: 100%;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 10px;
+            background: linear-gradient(90deg, #10b981, #34d399);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+        
+        /* Modal für PDF-Download */
         .modal {
             position: fixed;
             top: 0;
@@ -472,14 +487,10 @@
             border-radius: 16px;
             padding: 30px;
             width: 90%;
-            max-width: 800px;
-            max-height: 90vh;
+            max-width: 500px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
             transform: translateY(20px);
             transition: all 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
         }
         
         .modal.show .modal-content {
@@ -513,8 +524,6 @@
         }
         
         .modal-body {
-            flex-grow: 1;
-            overflow-y: auto;
             margin-bottom: 20px;
         }
         
@@ -524,71 +533,197 @@
             gap: 10px;
         }
         
-        /* Textvorschau-Bereich */
-        .text-preview {
-            width: 100%;
-            height: 400px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 15px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            overflow-y: auto;
-            background-color: #f8fafc;
-        }
-        
-        /* Anleitung-Container */
-        .instruction-container {
-            background-color: #f0f9ff;
-            border-left: 4px solid #3b82f6;
-            padding: 15px;
-            margin-bottom: 20px;
-            border-radius: 0 8px 8px 0;
-        }
-        
-        .instruction-container h4 {
-            color: #3b82f6;
-            font-weight: 700;
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .instruction-container ol {
-            margin-left: 20px;
-            list-style-type: decimal;
-        }
-        
-        .instruction-container li {
-            margin-bottom: 8px;
-        }
-        
-        /* Schritt-für-Schritt Anleitung */
-        .step {
-            display: flex;
-            margin-bottom: 15px;
-        }
-        
-        .step-number {
-            width: 28px;
-            height: 28px;
-            background-color: #3b82f6;
-            color: white;
-            border-radius: 50%;
+        /* PDF-Download-Button */
+        .pdf-download-btn {
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
-            flex-shrink: 0;
+            gap: 10px;
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 20px;
         }
         
-        .step-content {
-            flex-grow: 1;
+        .pdf-download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
         }
         
-        .step-content strong {
-            color: #3b82f6;
+        .pdf-download-btn:active {
+            transform: translateY(0);
+        }
+        
+        .pdf-download-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .pdf-download-btn.loading {
+            background: linear-gradient(135deg, #9ca3af, #d1d5db);
+            cursor: not-allowed;
+        }
+        
+        /* Erfolgs-Animation */
+        .success-checkmark {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+        
+        .success-checkmark .check-icon {
+            width: 80px;
+            height: 80px;
+            position: relative;
+            border-radius: 50%;
+            box-sizing: content-box;
+            border: 4px solid #10b981;
+        }
+        
+        .success-checkmark .check-icon::before {
+            top: 3px;
+            left: -2px;
+            width: 30px;
+            transform-origin: 100% 50%;
+            border-radius: 100px 0 0 100px;
+        }
+        
+        .success-checkmark .check-icon::after {
+            top: 0;
+            left: 30px;
+            width: 60px;
+            transform-origin: 0 50%;
+            border-radius: 0 100px 100px 0;
+            animation: rotate-circle 4.25s ease-in;
+        }
+        
+        .success-checkmark .check-icon::before, .success-checkmark .check-icon::after {
+            content: '';
+            height: 100px;
+            position: absolute;
+            background: #FFFFFF;
+            transform: rotate(-45deg);
+        }
+        
+        .success-checkmark .check-icon .icon-line {
+            height: 5px;
+            background-color: #10b981;
+            display: block;
+            border-radius: 2px;
+            position: absolute;
+            z-index: 10;
+        }
+        
+        .success-checkmark .check-icon .icon-line.line-tip {
+            top: 46px;
+            left: 14px;
+            width: 25px;
+            transform: rotate(45deg);
+            animation: icon-line-tip 0.75s;
+        }
+        
+        .success-checkmark .check-icon .icon-line.line-long {
+            top: 38px;
+            right: 8px;
+            width: 47px;
+            transform: rotate(-45deg);
+            animation: icon-line-long 0.75s;
+        }
+        
+        .success-checkmark .check-icon .icon-circle {
+            top: -4px;
+            left: -4px;
+            z-index: 10;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            box-sizing: content-box;
+            border: 4px solid rgba(16, 185, 129, 0.2);
+        }
+        
+        .success-checkmark .check-icon .icon-fix {
+            top: 8px;
+            width: 5px;
+            left: 26px;
+            z-index: 1;
+            height: 85px;
+            position: absolute;
+            transform: rotate(-45deg);
+            background-color: #FFFFFF;
+        }
+        
+        @keyframes rotate-circle {
+            0% {
+                transform: rotate(-45deg);
+            }
+            5% {
+                transform: rotate(-45deg);
+            }
+            12% {
+                transform: rotate(-405deg);
+            }
+            100% {
+                transform: rotate(-405deg);
+            }
+        }
+        
+        @keyframes icon-line-tip {
+            0% {
+                width: 0;
+                left: 1px;
+                top: 19px;
+            }
+            54% {
+                width: 0;
+                left: 1px;
+                top: 19px;
+            }
+            70% {
+                width: 50px;
+                left: -8px;
+                top: 37px;
+            }
+            84% {
+                width: 17px;
+                left: 21px;
+                top: 48px;
+            }
+            100% {
+                width: 25px;
+                left: 14px;
+                top: 46px;
+            }
+        }
+        
+        @keyframes icon-line-long {
+            0% {
+                width: 0;
+                right: 46px;
+                top: 54px;
+            }
+            65% {
+                width: 0;
+                right: 46px;
+                top: 54px;
+            }
+            84% {
+                width: 55px;
+                right: 0px;
+                top: 35px;
+            }
+            100% {
+                width: 47px;
+                right: 8px;
+                top: 38px;
+            }
         }
     </style>
 </head>
@@ -596,54 +731,49 @@
     <!-- Meldung für Statusanzeigen -->
     <div id="message" class="message">
         <div class="loading-spinner" id="messageSpinner"></div>
-        <span id="messageText">Daten werden vorbereitet...</span>
+        <span id="messageText">Seiten werden vorbereitet...</span>
     </div>
     
-    <!-- Text-Vorschau-Modal -->
-    <div id="textModal" class="modal">
+    <!-- PDF-Download-Modal -->
+    <div id="pdfModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 class="modal-title">Ihre Finanzanalyse</h3>
+                <h3 class="modal-title">PDF-Download</h3>
                 <button class="modal-close" id="closeModal">&times;</button>
             </div>
             <div class="modal-body">
-                <!-- Anleitung zum Speichern -->
-                <div class="instruction-container">
-                    <h4>
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        So speichern Sie Ihre Daten:
-                    </h4>
-                    
-                    <div class="step">
-                        <div class="step-number">1</div>
-                        <div class="step-content">
-                            Klicken Sie auf den <strong>Download-Button</strong> unten, um Ihre Daten als Textdatei zu speichern.
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">2</div>
-                        <div class="step-content">
-                            Die Datei wird automatisch auf Ihrem Gerät gespeichert.
-                        </div>
+                <div id="pdfProcessing">
+                    <p class="text-center mb-4">Ihr PDF wird vorbereitet...</p>
+                    <div class="progress-container">
+                        <div class="progress-bar" id="pdfProgressBar"></div>
                     </div>
                 </div>
-                
-                <!-- Text-Vorschau -->
-                <div id="textPreviewContainer">
-                    <pre id="textPreview" class="text-preview"></pre>
+                <div id="pdfSuccess" style="display: none;">
+                    <div class="success-checkmark">
+                        <div class="check-icon">
+                            <span class="icon-line line-tip"></span>
+                            <span class="icon-line line-long"></span>
+                            <div class="icon-circle"></div>
+                            <div class="icon-fix"></div>
+                        </div>
+                    </div>
+                    <p class="text-center text-lg font-bold text-green-600">PDF erfolgreich erstellt!</p>
+                    <p class="text-center text-gray-600 mt-2">Ihr PDF wurde erfolgreich erstellt und wird automatisch heruntergeladen.</p>
+                </div>
+                <div id="pdfError" style="display: none;">
+                    <div class="text-center text-red-500 mb-4">
+                        <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <p class="text-center text-lg font-bold text-red-600">Fehler beim Erstellen des PDFs</p>
+                    <p class="text-center text-gray-600 mt-2" id="errorMessage">Bitte versuchen Sie es erneut oder kontaktieren Sie den Support.</p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="downloadBtn" class="nav-button btn-download flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                    Herunterladen
-                </button>
-                <button id="closeBtn" class="nav-button btn-secondary">Schließen</button>
+                <button id="tryAgainBtn" class="nav-button btn-primary" style="display: none;">Erneut versuchen</button>
+                <button id="downloadAgainBtn" class="nav-button btn-download" style="display: none;">Erneut herunterladen</button>
+                <button id="closeSuccessBtn" class="nav-button btn-secondary" style="display: none;">Schließen</button>
             </div>
         </div>
     </div>
@@ -1006,28 +1136,28 @@
                     </thead>
                     <tbody>
                         <tr>
-                            <td><input type="text" id="goal_1_name" class="w-full border-0" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_1_age" class="w-full border-0" placeholder="18" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_1_capital" class="w-full border-0" placeholder="2.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_1_priority" class="w-full border-0" placeholder="2" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="18" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="2.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="2" style="border-color: #6ee7b7;"></td>
                         </tr>
                         <tr>
-                            <td><input type="text" id="goal_2_name" class="w-full border-0" placeholder="z.B. Studium" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_2_age" class="w-full border-0" placeholder="19-25" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_2_capital" class="w-full border-0" placeholder="30.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_2_priority" class="w-full border-0" placeholder="1" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Studium" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="19-25" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="30.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="1" style="border-color: #6ee7b7;"></td>
                         </tr>
                         <tr>
-                            <td><input type="text" id="goal_3_name" class="w-full border-0" placeholder="z.B. Auslandsjahr" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_3_age" class="w-full border-0" placeholder="20" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_3_capital" class="w-full border-0" placeholder="10.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_3_priority" class="w-full border-0" placeholder="3" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Auslandsjahr" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="20" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="10.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="3" style="border-color: #6ee7b7;"></td>
                         </tr>
                         <tr>
-                            <td><input type="text" id="goal_4_name" class="w-full border-0" placeholder="z.B. Eigenheim" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_4_age" class="w-full border-0" placeholder="30" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_4_capital" class="w-full border-0" placeholder="50.000€" style="border-color: #6ee7b7;"></td>
-                            <td><input type="text" id="goal_4_priority" class="w-full border-0" placeholder="4" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="z.B. Eigenheim" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="30" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="50.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" class="w-full border-0" placeholder="4" style="border-color: #6ee7b7;"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -1090,7 +1220,7 @@
                 </svg>
                 Zurück zu Seite 2
             </button>
-            <button id="generateTextBtn" class="nav-button btn-download flex items-center">
+            <button id="generatePdfBtn" class="nav-button btn-download flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                 </svg>
@@ -1106,6 +1236,10 @@
     </div>
     
     <script>
+        // Globale Variablen
+        let pdfDoc = null;
+        let pdfDataUrl = null;
+        
         // Seiten-Navigation
         function showPage(pageNum) {
             // Alle Seiten ausblenden
@@ -1121,7 +1255,7 @@
         }
         
         // Meldung anzeigen
-        function showMessage(text, showSpinner = false, duration = 3000, isError = false) {
+        function showMessage(text, showSpinner = false, duration = 3000) {
             const message = document.getElementById('message');
             const messageText = document.getElementById('messageText');
             const spinner = document.getElementById('messageSpinner');
@@ -1132,12 +1266,6 @@
                 spinner.style.display = 'inline-block';
             } else {
                 spinner.style.display = 'none';
-            }
-            
-            if (isError) {
-                message.classList.add('error');
-            } else {
-                message.classList.remove('error');
             }
             
             message.classList.add('show');
@@ -1158,6 +1286,12 @@
             };
         }
         
+        // Fortschrittsbalken aktualisieren
+        function updateProgress(percent) {
+            const progressBar = document.getElementById('pdfProgressBar');
+            progressBar.style.width = percent + '%';
+        }
+        
         // Modal anzeigen
         function showModal(modalId) {
             const modal = document.getElementById(modalId);
@@ -1170,181 +1304,127 @@
             modal.classList.remove('show');
         }
         
-        // Dateiname mit Datum generieren
-        function generateFileName() {
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('de-DE').replace(/\./g, '-');
-            return `SmartKidsInvest_Finanzanalyse_${dateStr}.txt`;
-        }
-        
-        // Checkbox-Status abrufen
-        function getCheckboxStatus(id) {
-            const checkbox = document.getElementById(id);
-            return checkbox && checkbox.checked ? "Ja" : "Nein";
-        }
-        
-        // Formularwert abrufen
-        function getFormValue(id) {
-            const element = document.getElementById(id);
-            return element ? (element.value || "-") : "-";
-        }
-        
-        // Daten als Text formatieren
-        function formatDataAsText() {
-            const today = new Date();
-            const dateStr = today.toLocaleDateString('de-DE');
-            const timeStr = today.toLocaleTimeString('de-DE');
+        // PDF-Generierung
+        async function generatePDF() {
+            // Modal anzeigen
+            showModal('pdfModal');
             
-            let text = "";
+            // Verarbeitungsansicht anzeigen
+            document.getElementById('pdfProcessing').style.display = 'block';
+            document.getElementById('pdfSuccess').style.display = 'none';
+            document.getElementById('pdfError').style.display = 'none';
+            document.getElementById('tryAgainBtn').style.display = 'none';
+            document.getElementById('downloadAgainBtn').style.display = 'none';
+            document.getElementById('closeSuccessBtn').style.display = 'none';
             
-            // Header
-            text += "=======================================================\n";
-            text += "           SMARTKIDSINVEST - FINANZANALYSE\n";
-            text += "=======================================================\n";
-            text += `Erstellt am: ${dateStr} um ${timeStr}\n`;
-            text += "=======================================================\n\n";
+            // Fortschritt zurücksetzen
+            updateProgress(0);
             
-            // Persönliche Angaben
-            text += "PERSÖNLICHE ANGABEN\n";
-            text += "-------------------------------------------------------\n";
-            text += `Name: ${getFormValue('name')}\n`;
-            text += `Kinder: ${getFormValue('children')}\n\n`;
-            
-            // Erwartungen
-            text += "ERWARTUNGEN & ERFAHRUNGEN\n";
-            text += "-------------------------------------------------------\n";
-            text += `Erwartungen an Kindervorsorge: ${getFormValue('expectations')}\n`;
-            text += `Bisherige Erfahrungen: ${getFormValue('experience')}\n\n`;
-            
-            // Ziele
-            text += "ZIELE FÜR DIE KINDER\n";
-            text += "-------------------------------------------------------\n";
-            text += `Vermögen für Ausbildung/Studium: ${getCheckboxStatus('goal1')}\n`;
-            text += `Startkapital ansparen: ${getCheckboxStatus('goal2')}\n`;
-            text += `Erste eigene Immobilie: ${getCheckboxStatus('goal3')}\n`;
-            text += `Flexible Rücklagen: ${getCheckboxStatus('goal4')}\n`;
-            text += `Schutz bei Unfall/Krankheit: ${getCheckboxStatus('goal5')}\n`;
-            text += `Langfristige finanzielle Sicherheit: ${getCheckboxStatus('goal6')}\n\n`;
-            
-            // Prioritäten
-            text += "PRIORITÄTEN\n";
-            text += "-------------------------------------------------------\n";
-            text += `Hohe Rendite: ${getCheckboxStatus('prio1')}\n`;
-            text += `Flexibilität (Geld jederzeit verfügbar): ${getCheckboxStatus('prio2')}\n`;
-            text += `Kontrolle mit 18 beim Kind: ${getCheckboxStatus('prio3')}\n`;
-            text += `Steuervorteile nutzen: ${getCheckboxStatus('prio4')}\n`;
-            text += `Staatliche Zulagen sichern: ${getCheckboxStatus('prio5')}\n`;
-            text += `Gesundheitliche Risiken absichern: ${getCheckboxStatus('prio6')}\n`;
-            text += `Vorhandene Finanzprodukte optimieren: ${getCheckboxStatus('prio7')}\n\n`;
-            
-            // Finanzielle Planung
-            text += "FINANZIELLE PLANUNG\n";
-            text += "-------------------------------------------------------\n";
-            text += `Verfügbares Budget: ${getFormValue('budget')}\n`;
-            text += `Vorhandene Rücklagen: ${getFormValue('savings')}\n`;
-            text += `Geplantes Investmentalter: ${getFormValue('investmentAge')}\n\n`;
-            
-            // Kapitalbedarf
-            text += "KAPITALBEDARF NACH ZIEL & ZEITPUNKT\n";
-            text += "-------------------------------------------------------\n";
-            text += "| Ziel                | Alter    | Kapitalbedarf | Priorität |\n";
-            text += "|---------------------|----------|---------------|----------|\n";
-            
-            for (let i = 1; i <= 4; i++) {
-                const name = getFormValue(`goal_${i}_name`);
-                const age = getFormValue(`goal_${i}_age`);
-                const capital = getFormValue(`goal_${i}_capital`);
-                const priority = getFormValue(`goal_${i}_priority`);
-                
-                text += `| ${name.padEnd(19)} | ${age.padEnd(8)} | ${capital.padEnd(13)} | ${priority.padEnd(8)} |\n`;
-            }
-            
-            text += "\n";
-            
-            // Bestehende Absicherung
-            text += "BESTEHENDE ABSICHERUNG\n";
-            text += "-------------------------------------------------------\n";
-            text += `Kinderinvaliditätsversicherung: ${getCheckboxStatus('insurance1')}\n`;
-            text += `Unfallversicherung für das Kind: ${getCheckboxStatus('insurance2')}\n`;
-            text += `Krankenzusatzversicherung: ${getCheckboxStatus('insurance3')}\n`;
-            text += `Risikolebensversicherung der Eltern: ${getCheckboxStatus('insurance4')}\n`;
-            text += `Vorsorgevollmacht & Patientenverfügung: ${getCheckboxStatus('insurance5')}\n\n`;
-            
-            // Footer
-            text += "=======================================================\n";
-            text += "                 ENDE DER FINANZANALYSE\n";
-            text += "=======================================================\n";
-            
-            return text;
-        }
-        
-        // Daten als Textdatei herunterladen
-        function downloadTextFile(text, filename) {
-            // Blob erstellen
-            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-            
-            // Download-Link erstellen
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = filename;
-            
-            // Link zum DOM hinzufügen und klicken
-            document.body.appendChild(link);
-            link.click();
-            
-            // Link wieder entfernen
-            document.body.removeChild(link);
-        }
-        
-        // Daten generieren und anzeigen
-        function generateTextData() {
             try {
-                // Meldung anzeigen
-                const loadingMsg = showMessage('Daten werden vorbereitet...', true, 0);
+                // jsPDF initialisieren
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
                 
-                // Daten formatieren
-                const textData = formatDataAsText();
+                // Für jede Seite
+                for (let i = 1; i <= 3; i++) {
+                    // Fortschritt aktualisieren
+                    updateProgress((i - 1) * 30);
+                    
+                    // Seite sichtbar machen für die Konvertierung
+                    const page = document.getElementById('page' + i);
+                    const originalDisplay = page.style.display;
+                    page.style.display = 'block';
+                    
+                    // Navigations- und Indikatorelemente temporär ausblenden
+                    const navElements = page.querySelectorAll('.no-print');
+                    navElements.forEach(el => {
+                        el.style.display = 'none';
+                    });
+                    
+                    // Warten, damit die Seite vollständig gerendert wird
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    
+                    // Seite in Canvas umwandeln
+                    const canvas = await html2canvas(page, {
+                        scale: 2, // Höhere Qualität
+                        useCORS: true,
+                        logging: false,
+                        backgroundColor: '#ffffff'
+                    });
+                    
+                    // Canvas in PDF einfügen
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const imgWidth = 210; // A4 Breite in mm
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    
+                    // Nicht die erste Seite? Dann neue Seite hinzufügen
+                    if (i > 1) {
+                        pdf.addPage();
+                    }
+                    
+                    pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                    
+                    // Fortschritt aktualisieren
+                    updateProgress(i * 30);
+                    
+                    // Ursprünglichen Zustand wiederherstellen
+                    page.style.display = originalDisplay;
+                    navElements.forEach(el => {
+                        el.style.display = '';
+                    });
+                }
                 
-                // Dateiname generieren
-                const fileName = generateFileName();
+                // PDF als Blob speichern
+                const pdfBlob = pdf.output('blob');
+                pdfDataUrl = URL.createObjectURL(pdfBlob);
                 
-                // Text in Vorschau anzeigen
-                document.getElementById('textPreview').textContent = textData;
+                // Fortschritt abschließen
+                updateProgress(100);
                 
-                // Modal anzeigen
-                showModal('textModal');
+                // Erfolgsansicht anzeigen
+                document.getElementById('pdfProcessing').style.display = 'none';
+                document.getElementById('pdfSuccess').style.display = 'block';
+                document.getElementById('downloadAgainBtn').style.display = 'block';
+                document.getElementById('closeSuccessBtn').style.display = 'block';
                 
-                // Download-Button konfigurieren
-                
-                
-                // Meldung aktualisieren
-                loadingMsg.update('Daten erfolgreich vorbereitet!');
-                setTimeout(() => {
-                    loadingMsg.hide();
-                }, 2000);
+                // PDF automatisch herunterladen
+                downloadPDF();
                 
             } catch (error) {
-                console.error('Fehler bei der Datengenerierung:', error);
-                showMessage('Fehler bei der Datengenerierung: ' + error.message, false, 5000, true);
+                console.error('Fehler bei der PDF-Generierung:', error);
+                
+                // Fehleransicht anzeigen
+                document.getElementById('pdfProcessing').style.display = 'none';
+                document.getElementById('pdfError').style.display = 'block';
+                document.getElementById('errorMessage').textContent = 'Ein Fehler ist aufgetreten: ' + error.message;
+                document.getElementById('tryAgainBtn').style.display = 'block';
+                document.getElementById('closeSuccessBtn').style.display = 'block';
             }
+        }
+        
+        // PDF herunterladen
+        function downloadPDF() {
+            if (!pdfDataUrl) {
+                showMessage('Fehler: PDF wurde nicht erstellt.', false, 3000);
+                return;
+            }
+            
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('de-DE').replace(/\./g, '-');
+            const fileName = `SmartKidsInvest_Finanzanalyse_${dateStr}.pdf`;
+            
+            const link = document.createElement('a');
+            link.href = pdfDataUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showMessage('PDF wurde heruntergeladen!', false, 3000);
         }
         
         // Event-Listener hinzufügen, wenn das Dokument geladen ist
         document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('downloadBtn').addEventListener('click', () => {
-                // Blende Modale aus, falls offen
-                const modal = document.getElementById('textModal');
-                if (modal) modal.classList.remove('show');
-
-                // Alle Seiten sichtbar machen
-                document.getElementById('page1').style.display = 'block';
-                document.getElementById('page2').style.display = 'block';
-                document.getElementById('page3').style.display = 'block';
-
-                // Druckansicht starten
-                window.print();
-            });
-
             // Checkboxen initialisieren
             const checkboxes = document.querySelectorAll('.custom-checkbox input');
             checkboxes.forEach(checkbox => {
@@ -1359,13 +1439,15 @@
                 });
             });
             
-            // Text-Generierungs-Button-Event hinzufügen
-            document.getElementById('generateTextBtn').addEventListener('click', generateTextData);
+            // PDF-Generierungs-Button-Event hinzufügen
+            document.getElementById('generatePdfBtn').addEventListener('click', generatePDF);
             
             // Modal-Buttons
-            document.getElementById('closeModal').addEventListener('click', () => hideModal('textModal'));
-            document.getElementById('closeBtn').addEventListener('click', () => hideModal('textModal'));
+            document.getElementById('closeModal').addEventListener('click', () => hideModal('pdfModal'));
+            document.getElementById('closeSuccessBtn').addEventListener('click', () => hideModal('pdfModal'));
+            document.getElementById('tryAgainBtn').addEventListener('click', generatePDF);
+            document.getElementById('downloadAgainBtn').addEventListener('click', downloadPDF);
         });
     </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c7063312e2e51b',t:'MTc0NjY4NzA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c78e4912a6e50a',t:'MTc0NjY5MjYxNC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
