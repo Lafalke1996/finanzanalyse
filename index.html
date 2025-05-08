@@ -591,6 +591,7 @@
             color: #3b82f6;
         }
     </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <!-- Meldung für Statusanzeigen -->
@@ -1335,14 +1336,33 @@
         // Event-Listener hinzufügen, wenn das Dokument geladen ist
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('downloadBtn').addEventListener('click', () => {
-                const textData = document.getElementById('textPreview').textContent;
-                const fileName = generateFileName();
-                if (textData.trim()) {
-                    downloadTextFile(textData, fileName);
-                    showMessage('Datei wurde heruntergeladen!', false, 3000);
-                } else {
-                    showMessage('Bitte zuerst auf "Daten speichern" klicken.', false, 4000, true);
-                }
+                // Blende ggf. Modale aus
+                document.getElementById('textModal').classList.remove('show');
+
+                // Zeige alle Seiten sichtbar
+                const p1 = document.getElementById('page1');
+                const p2 = document.getElementById('page2');
+                const p3 = document.getElementById('page3');
+                p1.style.display = 'block';
+                p2.style.display = 'block';
+                p3.style.display = 'block';
+
+                // Erstelle Container mit allen Seiten
+                const container = document.createElement('div');
+                container.appendChild(p1.cloneNode(true));
+                container.appendChild(p2.cloneNode(true));
+                container.appendChild(p3.cloneNode(true));
+
+                // PDF-Optionen
+                const opt = {
+                    margin:       0,
+                    filename:     generateFileName().replace('.txt', '.pdf'),
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2 },
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(container).save();
             });
 
             // Checkboxen initialisieren
