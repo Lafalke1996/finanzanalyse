@@ -1316,10 +1316,7 @@
                 showModal('textModal');
                 
                 // Download-Button konfigurieren
-                document.getElementById('downloadBtn').onclick = function() {
-                    downloadTextFile(textData, fileName);
-                    showMessage('Datei wurde heruntergeladen!', false, 3000);
-                };
+                
                 
                 // Meldung aktualisieren
                 loadingMsg.update('Daten erfolgreich vorbereitet!');
@@ -1336,10 +1333,8 @@
         // Event-Listener hinzufügen, wenn das Dokument geladen ist
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('downloadBtn').addEventListener('click', () => {
-                // Blende ggf. Modale aus
                 document.getElementById('textModal').classList.remove('show');
 
-                // Zeige alle Seiten sichtbar
                 const p1 = document.getElementById('page1');
                 const p2 = document.getElementById('page2');
                 const p3 = document.getElementById('page3');
@@ -1347,13 +1342,11 @@
                 p2.style.display = 'block';
                 p3.style.display = 'block';
 
-                // Erstelle Container mit allen Seiten
                 const container = document.createElement('div');
                 container.appendChild(p1.cloneNode(true));
                 container.appendChild(p2.cloneNode(true));
                 container.appendChild(p3.cloneNode(true));
 
-                // PDF-Optionen
                 const opt = {
                     margin:       0,
                     filename:     generateFileName().replace('.txt', '.pdf'),
