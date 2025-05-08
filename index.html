@@ -591,7 +591,6 @@
             color: #3b82f6;
         }
     </style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
     <!-- Meldung für Statusanzeigen -->
@@ -1095,7 +1094,7 @@
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                 </svg>
-                Daten speichern
+                PDF herunterladen
             </button>
         </div>
         
@@ -1333,29 +1332,17 @@
         // Event-Listener hinzufügen, wenn das Dokument geladen ist
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('downloadBtn').addEventListener('click', () => {
-                document.getElementById('textModal').classList.remove('show');
+                // Blende Modale aus, falls offen
+                const modal = document.getElementById('textModal');
+                if (modal) modal.classList.remove('show');
 
-                const p1 = document.getElementById('page1');
-                const p2 = document.getElementById('page2');
-                const p3 = document.getElementById('page3');
-                p1.style.display = 'block';
-                p2.style.display = 'block';
-                p3.style.display = 'block';
+                // Alle Seiten sichtbar machen
+                document.getElementById('page1').style.display = 'block';
+                document.getElementById('page2').style.display = 'block';
+                document.getElementById('page3').style.display = 'block';
 
-                const container = document.createElement('div');
-                container.appendChild(p1.cloneNode(true));
-                container.appendChild(p2.cloneNode(true));
-                container.appendChild(p3.cloneNode(true));
-
-                const opt = {
-                    margin:       0,
-                    filename:     generateFileName().replace('.txt', '.pdf'),
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2 },
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-                };
-
-                html2pdf().set(opt).from(container).save();
+                // Druckansicht starten
+                window.print();
             });
 
             // Checkboxen initialisieren
