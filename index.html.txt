@@ -1,0 +1,1360 @@
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartKidsInvest - Finanzanalyse für Eltern</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: #f8fafc;
+            color: #333;
+        }
+        
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm;
+            margin: 10mm auto;
+            background-color: white;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        h1 {
+            color: #ffffff;
+            font-weight: 800;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+        
+        h2 {
+            color: #8b5cf6;
+            font-weight: 700;
+        }
+        
+        .section {
+            margin-bottom: 8mm;
+            padding: 5mm;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            background-color: #fff;
+        }
+        
+        .section::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
+            border-radius: 5px 5px 0 0;
+        }
+        
+        .section-alt {
+            background-color: #f0f9ff;
+        }
+        
+        .section-alt::before {
+            background: linear-gradient(90deg, #0ea5e9, #38bdf8, #7dd3fc);
+        }
+        
+        .section-green {
+            background-color: #f0fdf4;
+        }
+        
+        .section-green::before {
+            background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7);
+        }
+        
+        .section-purple {
+            background-color: #faf5ff;
+        }
+        
+        .section-purple::before {
+            background: linear-gradient(90deg, #8b5cf6, #a78bfa, #c4b5fd);
+        }
+        
+        .section-orange {
+            background-color: #fff7ed;
+        }
+        
+        .section-orange::before {
+            background: linear-gradient(90deg, #f97316, #fb923c, #fdba74);
+        }
+        
+        input[type="text"], textarea {
+            border: 2px solid #93c5fd;
+            border-radius: 8px;
+            padding: 10px;
+            width: 100%;
+            background-color: #ffffff;
+            transition: all 0.3s ease;
+            font-family: 'Nunito', sans-serif;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+            outline: none;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 3mm;
+            transition: transform 0.2s;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            height: 44px;
+        }
+        
+        .checkbox-container:hover {
+            background-color: rgba(147, 197, 253, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .custom-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #3b82f6;
+            border-radius: 6px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background-color: white;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .custom-checkbox input {
+            opacity: 0;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            z-index: 2;
+        }
+        
+        .custom-checkbox .checkmark {
+            width: 14px;
+            height: 14px;
+            background-color: #3b82f6;
+            border-radius: 3px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .custom-checkbox input:checked + .checkmark {
+            opacity: 1;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        
+        .page-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10mm;
+        }
+        
+        .nav-button {
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-family: 'Nunito', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 160px;
+        }
+        
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, #f472b6, #ec4899);
+            color: white;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        table th, table td {
+            border: 1px solid #93c5fd;
+            padding: 10px;
+            text-align: left;
+        }
+        
+        table th {
+            background-color: #dbeafe;
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .icon {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        
+        .page-indicator {
+            text-align: center;
+            margin-top: 5mm;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .dot-indicator {
+            display: inline-block;
+            width: 40px;
+            height: 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        
+        .dot-active {
+            background-color: #4f46e5;
+            transform: scale(1.2);
+        }
+        
+        .dot-inactive {
+            background-color: #e2e8f0;
+        }
+        
+        .header-decoration {
+            position: relative;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .header-decoration:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd, #bfdbfe, #dbeafe);
+            border-radius: 3px;
+        }
+        
+        .page-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .color-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            opacity: 0.15;
+        }
+        
+        .blob-1 {
+            width: 300px;
+            height: 300px;
+            background-color: #60a5fa;
+            top: -100px;
+            left: -100px;
+        }
+        
+        .blob-2 {
+            width: 250px;
+            height: 250px;
+            background-color: #38bdf8;
+            bottom: -50px;
+            right: -50px;
+        }
+        
+        .blob-3 {
+            width: 200px;
+            height: 200px;
+            background-color: #34d399;
+            bottom: 30%;
+            left: 10%;
+        }
+        
+        .blob-4 {
+            width: 180px;
+            height: 180px;
+            background-color: #fbbf24;
+            top: 20%;
+            right: 5%;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            font-weight: 700;
+            color: #4f46e5;
+            font-size: 1.1rem;
+        }
+        
+        .section-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: white;
+            border-radius: 50%;
+            margin-right: 12px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            flex-shrink: 0;
+        }
+        
+        .section-number {
+            background-color: #4f46e5;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 10px;
+            flex-shrink: 0;
+        }
+        
+        .family-header {
+            background: linear-gradient(135deg, #4f46e5, #6366f1, #8b5cf6);
+            color: white;
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header-decoration-1 {
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+        
+        .header-decoration-2 {
+            position: absolute;
+            bottom: -30px;
+            left: 30%;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 1;
+        }
+        
+        /* Meldung-Stil */
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #10b981;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .message.show {
+            opacity: 1;
+        }
+        
+        .message.error {
+            background-color: #ef4444;
+        }
+        
+        /* Ladeanimation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Modal für Textvorschau */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 16px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .modal.show .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            transition: color 0.2s;
+        }
+        
+        .modal-close:hover {
+            color: #334155;
+        }
+        
+        .modal-body {
+            flex-grow: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
+        /* Textvorschau-Bereich */
+        .text-preview {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-y: auto;
+            background-color: #f8fafc;
+        }
+        
+        /* Anleitung-Container */
+        .instruction-container {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        .instruction-container h4 {
+            color: #3b82f6;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .instruction-container ol {
+            margin-left: 20px;
+            list-style-type: decimal;
+        }
+        
+        .instruction-container li {
+            margin-bottom: 8px;
+        }
+        
+        /* Schritt-für-Schritt Anleitung */
+        .step {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        
+        .step-number {
+            width: 28px;
+            height: 28px;
+            background-color: #3b82f6;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .step-content {
+            flex-grow: 1;
+        }
+        
+        .step-content strong {
+            color: #3b82f6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Meldung für Statusanzeigen -->
+    <div id="message" class="message">
+        <div class="loading-spinner" id="messageSpinner"></div>
+        <span id="messageText">Daten werden vorbereitet...</span>
+    </div>
+    
+    <!-- Text-Vorschau-Modal -->
+    <div id="textModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Ihre Finanzanalyse</h3>
+                <button class="modal-close" id="closeModal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Anleitung zum Speichern -->
+                <div class="instruction-container">
+                    <h4>
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        So speichern Sie Ihre Daten:
+                    </h4>
+                    
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            Klicken Sie auf den <strong>Download-Button</strong> unten, um Ihre Daten als Textdatei zu speichern.
+                        </div>
+                    </div>
+                    
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            Die Datei wird automatisch auf Ihrem Gerät gespeichert.
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Text-Vorschau -->
+                <div id="textPreviewContainer">
+                    <pre id="textPreview" class="text-preview"></pre>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="downloadBtn" class="nav-button btn-download flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Herunterladen
+                </button>
+                <button id="closeBtn" class="nav-button btn-secondary">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="page1" class="page">
+        <div class="page-background">
+            <div class="color-blob blob-1"></div>
+            <div class="color-blob blob-2"></div>
+            <div class="color-blob blob-3"></div>
+            <div class="color-blob blob-4"></div>
+        </div>
+        
+        <div class="family-header">
+            <div class="header-content">
+                <h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
+                <p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
+            </div>
+            <div class="header-decoration-1"></div>
+            <div class="header-decoration-2"></div>
+        </div>
+        
+        <h2 class="text-xl mb-6 flex items-center">
+            <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+            Persönliche Angaben & Erwartungen
+        </h2>
+        
+        <div class="section section-purple">
+            <div class="mb-4">
+                <div class="section-title" style="color: #8b5cf6;">
+                    <div class="section-number" style="background-color: #8b5cf6;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                    Dein Name
+                </div>
+                <input type="text" id="name" class="w-full" style="border-color: #c4b5fd;">
+            </div>
+            
+            <div class="mb-4">
+                <div class="section-title" style="color: #8b5cf6;">
+                    <div class="section-number" style="background-color: #8b5cf6;">1</div>
+                    Wie viele Kinder hast Du – und wie heißen sie? (inkl. Geburtsdaten)
+                </div>
+                <textarea id="children" rows="3" class="w-full" style="border-color: #c4b5fd;"></textarea>
+            </div>
+        </div>
+        
+        <div class="section section-orange">
+            <div class="mb-4">
+                <div class="section-title" style="color: #f97316;">
+                    <div class="section-number" style="background-color: #f97316;">2</div>
+                    Was erwartest Du von einer guten Kindervorsorge?
+                </div>
+                <textarea id="expectations" rows="2" class="w-full" style="border-color: #fdba74;"></textarea>
+            </div>
+            
+            <div class="mb-4">
+                <div class="section-title" style="color: #f97316;">
+                    <div class="section-number" style="background-color: #f97316;">3</div>
+                    Welche Erfahrungen hast Du bisher mit Geldanlage oder Absicherung für Dein(e) Kind(er) gemacht?
+                </div>
+                <textarea id="experience" rows="2" class="w-full" style="border-color: #fdba74;"></textarea>
+            </div>
+        </div>
+        
+        <div class="page-nav no-print">
+            <div></div>
+            <button class="nav-button btn-primary flex items-center" onclick="showPage(2)">
+                Weiter zu Seite 2
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="page-indicator no-print">
+            <span class="dot-indicator dot-active"></span>
+            <span class="dot-indicator dot-inactive"></span>
+            <span class="dot-indicator dot-inactive"></span>
+        </div>
+    </div>
+    
+    <div id="page2" class="page" style="display: none;">
+        <div class="page-background">
+            <div class="color-blob blob-1"></div>
+            <div class="color-blob blob-2"></div>
+            <div class="color-blob blob-3"></div>
+            <div class="color-blob blob-4"></div>
+        </div>
+        
+        <div class="family-header">
+            <div class="header-content">
+                <h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
+                <p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
+            </div>
+            <div class="header-decoration-1"></div>
+            <div class="header-decoration-2"></div>
+        </div>
+        
+        <h2 class="text-xl mb-6 flex items-center" style="color: #8b5cf6;">
+            <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+            </svg>
+            Ziele & Prioritäten
+        </h2>
+        
+        <div class="section section-green">
+            <div class="section-title" style="color: #10b981;">
+                <div class="section-number" style="background-color: #10b981;">4</div>
+                Ziele für Dein(e) Kind(er)
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #10b981;">
+                        <input type="checkbox" id="goal1">
+                        <div class="checkmark" style="background-color: #10b981;"></div>
+                    </div>
+                    <div class="checkbox-label">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                        Vermögen für Ausbildung / Studium aufbauen
+                    </div>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #10b981;">
+                        <input type="checkbox" id="goal2">
+                        <div class="checkmark" style="background-color: #10b981;"></div>
+                    </div>
+                    <div class="checkbox-label">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Startkapital ansparen
+                    </div>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #10b981;">
+                        <input type="checkbox" id="goal3">
+                        <div class="checkmark" style="background-color: #10b981;"></div>
+                    </div>
+                    <div class="checkbox-label">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                        </svg>
+                        Erste eigene Immobilie erwerben
+                    </div>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #10b981;">
+                        <input type="checkbox" id="goal4">
+                        <div class="checkmark" style="background-color: #10b981;"></div>
+                    </div>
+                    <div class="checkbox-label">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
+                        </svg>
+                        Flexible Rücklagen für Zwischenziele
+                    </div>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #10b981;">
+                        <input type="checkbox" id="goal5">
+                        <div class="checkmark" style="background-color: #10b981;"></div>
+                    </div>
+                    <div class="checkbox-label">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                        Schutz bei Unfall oder Krankheit
+                    </div>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #10b981;">
+                        <input type="checkbox" id="goal6">
+                        <div class="checkmark" style="background-color: #10b981;"></div>
+                    </div>
+                    <div class="checkbox-label">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                        Langfristige finanzielle Sicherheit aufbauen
+                    </div>
+                </label>
+            </div>
+        </div>
+        
+        <div class="section section-orange">
+            <div class="section-title" style="color: #f97316;">
+                <div class="section-number" style="background-color: #f97316;">5</div>
+                Das ist mir besonders wichtig
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="prio1">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Hohe Rendite</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="prio2">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Flexibilität (Geld jederzeit verfügbar)</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="prio3">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Kontrolle mit 18 beim Kind</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="prio4">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Steuervorteile nutzen</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="prio5">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Staatliche Zulagen sichern</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="prio6">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Gesundheitliche Risiken absichern</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="prio7">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Vorhandene Finanzprodukte optimieren</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="page-nav no-print">
+            <button class="nav-button btn-secondary flex items-center" onclick="showPage(1)">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Zurück zu Seite 1
+            </button>
+            <button class="nav-button btn-primary flex items-center" onclick="showPage(3)">
+                Weiter zu Seite 3
+                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <div class="page-indicator no-print">
+            <span class="dot-indicator dot-inactive"></span>
+            <span class="dot-indicator dot-active"></span>
+            <span class="dot-indicator dot-inactive"></span>
+        </div>
+    </div>
+    
+    <div id="page3" class="page" style="display: none;">
+        <div class="page-background">
+            <div class="color-blob blob-1"></div>
+            <div class="color-blob blob-2"></div>
+            <div class="color-blob blob-3"></div>
+            <div class="color-blob blob-4"></div>
+        </div>
+        
+        <div class="family-header">
+            <div class="header-content">
+                <h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
+                <p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
+            </div>
+            <div class="header-decoration-1"></div>
+            <div class="header-decoration-2"></div>
+        </div>
+        
+        <h2 class="text-xl mb-6 flex items-center" style="color: #10b981;">
+            <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+            </svg>
+            Finanzielle Planung & Absicherung
+        </h2>
+        
+        <div class="section section-purple">
+            <div class="section-title" style="color: #8b5cf6;">
+                <div class="section-number" style="background-color: #8b5cf6;">6</div>
+                Finanzielle Eingaben
+            </div>
+            
+            <div class="mb-3">
+                <label class="block mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                    </svg>
+                    Verfügbares Budget für Kindervorsorge
+                </label>
+                <input type="text" id="budget" class="w-full" placeholder="z.B. 100€ monatlich" style="border-color: #c4b5fd;">
+            </div>
+            
+            <div class="mb-3">
+                <label class="block mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                    </svg>
+                    Bereits vorhandene Rücklagen fürs Kind
+                </label>
+                <input type="text" id="savings" class="w-full" placeholder="z.B. 1.000€" style="border-color: #c4b5fd;">
+            </div>
+            
+            <div class="mb-3">
+                <label class="block mb-2 flex items-center">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Bis zu welchem Alter planst Du das Investment?
+                </label>
+                <input type="text" id="investmentAge" class="w-full" placeholder="z.B. 18 Jahre oder 25 Jahre" style="border-color: #c4b5fd;">
+            </div>
+        </div>
+        
+        <div class="section section-green">
+            <div class="section-title" style="color: #10b981;">
+                <div class="section-number" style="background-color: #10b981;">7</div>
+                Kapitalbedarf nach Ziel & Zeitpunkt
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full mb-4 rounded-lg overflow-hidden">
+                    <thead>
+                        <tr>
+                            <th style="background-color: #d1fae5; color: #10b981;">Ziel</th>
+                            <th style="background-color: #d1fae5; color: #10b981;">Alter</th>
+                            <th style="background-color: #d1fae5; color: #10b981;">Kapitalbedarf</th>
+                            <th style="background-color: #d1fae5; color: #10b981;">Priorität (1–5)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="goal_1_name" class="w-full border-0" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_1_age" class="w-full border-0" placeholder="18" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_1_capital" class="w-full border-0" placeholder="2.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_1_priority" class="w-full border-0" placeholder="2" style="border-color: #6ee7b7;"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="goal_2_name" class="w-full border-0" placeholder="z.B. Studium" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_2_age" class="w-full border-0" placeholder="19-25" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_2_capital" class="w-full border-0" placeholder="30.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_2_priority" class="w-full border-0" placeholder="1" style="border-color: #6ee7b7;"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="goal_3_name" class="w-full border-0" placeholder="z.B. Auslandsjahr" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_3_age" class="w-full border-0" placeholder="20" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_3_capital" class="w-full border-0" placeholder="10.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_3_priority" class="w-full border-0" placeholder="3" style="border-color: #6ee7b7;"></td>
+                        </tr>
+                        <tr>
+                            <td><input type="text" id="goal_4_name" class="w-full border-0" placeholder="z.B. Eigenheim" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_4_age" class="w-full border-0" placeholder="30" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_4_capital" class="w-full border-0" placeholder="50.000€" style="border-color: #6ee7b7;"></td>
+                            <td><input type="text" id="goal_4_priority" class="w-full border-0" placeholder="4" style="border-color: #6ee7b7;"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="section section-orange">
+            <div class="section-title" style="color: #f97316;">
+                <div class="section-number" style="background-color: #f97316;">8</div>
+                Bestehende Absicherung
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="insurance1">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Kinderinvaliditätsversicherung</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="insurance2">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Unfallversicherung für das Kind</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="insurance3">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Krankenzusatzversicherung</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="insurance4">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Risikolebensversicherung der Eltern</span>
+                </label>
+                
+                <label class="checkbox-container">
+                    <div class="custom-checkbox" style="border-color: #f97316;">
+                        <input type="checkbox" id="insurance5">
+                        <div class="checkmark" style="background-color: #f97316;"></div>
+                    </div>
+                    <span>Vorsorgevollmacht & Patientenverfügung</span>
+                </label>
+            </div>
+        </div>
+        
+        <div class="page-nav no-print">
+            <button class="nav-button btn-secondary flex items-center" onclick="showPage(2)">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Zurück zu Seite 2
+            </button>
+            <button id="generateTextBtn" class="nav-button btn-download flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Daten speichern
+            </button>
+        </div>
+        
+        <div class="page-indicator no-print">
+            <span class="dot-indicator dot-inactive"></span>
+            <span class="dot-indicator dot-inactive"></span>
+            <span class="dot-indicator dot-active"></span>
+        </div>
+    </div>
+    
+    <script>
+        // Seiten-Navigation
+        function showPage(pageNum) {
+            // Alle Seiten ausblenden
+            document.getElementById('page1').style.display = 'none';
+            document.getElementById('page2').style.display = 'none';
+            document.getElementById('page3').style.display = 'none';
+            
+            // Gewünschte Seite einblenden
+            document.getElementById('page' + pageNum).style.display = 'block';
+            
+            // Zum Seitenanfang scrollen
+            window.scrollTo(0, 0);
+        }
+        
+        // Meldung anzeigen
+        function showMessage(text, showSpinner = false, duration = 3000, isError = false) {
+            const message = document.getElementById('message');
+            const messageText = document.getElementById('messageText');
+            const spinner = document.getElementById('messageSpinner');
+            
+            messageText.textContent = text;
+            
+            if (showSpinner) {
+                spinner.style.display = 'inline-block';
+            } else {
+                spinner.style.display = 'none';
+            }
+            
+            if (isError) {
+                message.classList.add('error');
+            } else {
+                message.classList.remove('error');
+            }
+            
+            message.classList.add('show');
+            
+            if (duration > 0) {
+                setTimeout(() => {
+                    message.classList.remove('show');
+                }, duration);
+            }
+            
+            return {
+                hide: () => {
+                    message.classList.remove('show');
+                },
+                update: (newText) => {
+                    messageText.textContent = newText;
+                }
+            };
+        }
+        
+        // Modal anzeigen
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.add('show');
+        }
+        
+        // Modal ausblenden
+        function hideModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('show');
+        }
+        
+        // Dateiname mit Datum generieren
+        function generateFileName() {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('de-DE').replace(/\./g, '-');
+            return `SmartKidsInvest_Finanzanalyse_${dateStr}.txt`;
+        }
+        
+        // Checkbox-Status abrufen
+        function getCheckboxStatus(id) {
+            const checkbox = document.getElementById(id);
+            return checkbox && checkbox.checked ? "Ja" : "Nein";
+        }
+        
+        // Formularwert abrufen
+        function getFormValue(id) {
+            const element = document.getElementById(id);
+            return element ? (element.value || "-") : "-";
+        }
+        
+        // Daten als Text formatieren
+        function formatDataAsText() {
+            const today = new Date();
+            const dateStr = today.toLocaleDateString('de-DE');
+            const timeStr = today.toLocaleTimeString('de-DE');
+            
+            let text = "";
+            
+            // Header
+            text += "=======================================================\n";
+            text += "           SMARTKIDSINVEST - FINANZANALYSE\n";
+            text += "=======================================================\n";
+            text += `Erstellt am: ${dateStr} um ${timeStr}\n`;
+            text += "=======================================================\n\n";
+            
+            // Persönliche Angaben
+            text += "PERSÖNLICHE ANGABEN\n";
+            text += "-------------------------------------------------------\n";
+            text += `Name: ${getFormValue('name')}\n`;
+            text += `Kinder: ${getFormValue('children')}\n\n`;
+            
+            // Erwartungen
+            text += "ERWARTUNGEN & ERFAHRUNGEN\n";
+            text += "-------------------------------------------------------\n";
+            text += `Erwartungen an Kindervorsorge: ${getFormValue('expectations')}\n`;
+            text += `Bisherige Erfahrungen: ${getFormValue('experience')}\n\n`;
+            
+            // Ziele
+            text += "ZIELE FÜR DIE KINDER\n";
+            text += "-------------------------------------------------------\n";
+            text += `Vermögen für Ausbildung/Studium: ${getCheckboxStatus('goal1')}\n`;
+            text += `Startkapital ansparen: ${getCheckboxStatus('goal2')}\n`;
+            text += `Erste eigene Immobilie: ${getCheckboxStatus('goal3')}\n`;
+            text += `Flexible Rücklagen: ${getCheckboxStatus('goal4')}\n`;
+            text += `Schutz bei Unfall/Krankheit: ${getCheckboxStatus('goal5')}\n`;
+            text += `Langfristige finanzielle Sicherheit: ${getCheckboxStatus('goal6')}\n\n`;
+            
+            // Prioritäten
+            text += "PRIORITÄTEN\n";
+            text += "-------------------------------------------------------\n";
+            text += `Hohe Rendite: ${getCheckboxStatus('prio1')}\n`;
+            text += `Flexibilität (Geld jederzeit verfügbar): ${getCheckboxStatus('prio2')}\n`;
+            text += `Kontrolle mit 18 beim Kind: ${getCheckboxStatus('prio3')}\n`;
+            text += `Steuervorteile nutzen: ${getCheckboxStatus('prio4')}\n`;
+            text += `Staatliche Zulagen sichern: ${getCheckboxStatus('prio5')}\n`;
+            text += `Gesundheitliche Risiken absichern: ${getCheckboxStatus('prio6')}\n`;
+            text += `Vorhandene Finanzprodukte optimieren: ${getCheckboxStatus('prio7')}\n\n`;
+            
+            // Finanzielle Planung
+            text += "FINANZIELLE PLANUNG\n";
+            text += "-------------------------------------------------------\n";
+            text += `Verfügbares Budget: ${getFormValue('budget')}\n`;
+            text += `Vorhandene Rücklagen: ${getFormValue('savings')}\n`;
+            text += `Geplantes Investmentalter: ${getFormValue('investmentAge')}\n\n`;
+            
+            // Kapitalbedarf
+            text += "KAPITALBEDARF NACH ZIEL & ZEITPUNKT\n";
+            text += "-------------------------------------------------------\n";
+            text += "| Ziel                | Alter    | Kapitalbedarf | Priorität |\n";
+            text += "|---------------------|----------|---------------|----------|\n";
+            
+            for (let i = 1; i <= 4; i++) {
+                const name = getFormValue(`goal_${i}_name`);
+                const age = getFormValue(`goal_${i}_age`);
+                const capital = getFormValue(`goal_${i}_capital`);
+                const priority = getFormValue(`goal_${i}_priority`);
+                
+                text += `| ${name.padEnd(19)} | ${age.padEnd(8)} | ${capital.padEnd(13)} | ${priority.padEnd(8)} |\n`;
+            }
+            
+            text += "\n";
+            
+            // Bestehende Absicherung
+            text += "BESTEHENDE ABSICHERUNG\n";
+            text += "-------------------------------------------------------\n";
+            text += `Kinderinvaliditätsversicherung: ${getCheckboxStatus('insurance1')}\n`;
+            text += `Unfallversicherung für das Kind: ${getCheckboxStatus('insurance2')}\n`;
+            text += `Krankenzusatzversicherung: ${getCheckboxStatus('insurance3')}\n`;
+            text += `Risikolebensversicherung der Eltern: ${getCheckboxStatus('insurance4')}\n`;
+            text += `Vorsorgevollmacht & Patientenverfügung: ${getCheckboxStatus('insurance5')}\n\n`;
+            
+            // Footer
+            text += "=======================================================\n";
+            text += "                 ENDE DER FINANZANALYSE\n";
+            text += "=======================================================\n";
+            
+            return text;
+        }
+        
+        // Daten als Textdatei herunterladen
+        function downloadTextFile(text, filename) {
+            // Blob erstellen
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            
+            // Download-Link erstellen
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            
+            // Link zum DOM hinzufügen und klicken
+            document.body.appendChild(link);
+            link.click();
+            
+            // Link wieder entfernen
+            document.body.removeChild(link);
+        }
+        
+        // Daten generieren und anzeigen
+        function generateTextData() {
+            try {
+                // Meldung anzeigen
+                const loadingMsg = showMessage('Daten werden vorbereitet...', true, 0);
+                
+                // Daten formatieren
+                const textData = formatDataAsText();
+                
+                // Dateiname generieren
+                const fileName = generateFileName();
+                
+                // Text in Vorschau anzeigen
+                document.getElementById('textPreview').textContent = textData;
+                
+                // Modal anzeigen
+                showModal('textModal');
+                
+                // Download-Button konfigurieren
+                document.getElementById('downloadBtn').onclick = function() {
+                    downloadTextFile(textData, fileName);
+                    showMessage('Datei wurde heruntergeladen!', false, 3000);
+                };
+                
+                // Meldung aktualisieren
+                loadingMsg.update('Daten erfolgreich vorbereitet!');
+                setTimeout(() => {
+                    loadingMsg.hide();
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Fehler bei der Datengenerierung:', error);
+                showMessage('Fehler bei der Datengenerierung: ' + error.message, false, 5000, true);
+            }
+        }
+        
+        // Event-Listener hinzufügen, wenn das Dokument geladen ist
+        document.addEventListener('DOMContentLoaded', function() {
+            // Checkboxen initialisieren
+            const checkboxes = document.querySelectorAll('.custom-checkbox input');
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    // Dies stellt sicher, dass der visuelle Status korrekt aktualisiert wird
+                    const checkmark = this.nextElementSibling;
+                    if (this.checked) {
+                        checkmark.style.opacity = '1';
+                    } else {
+                        checkmark.style.opacity = '0';
+                    }
+                });
+            });
+            
+            // Text-Generierungs-Button-Event hinzufügen
+            document.getElementById('generateTextBtn').addEventListener('click', generateTextData);
+            
+            // Modal-Buttons
+            document.getElementById('closeModal').addEventListener('click', () => hideModal('textModal'));
+            document.getElementById('closeBtn').addEventListener('click', () => hideModal('textModal'));
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93c7063312e2e51b',t:'MTc0NjY4NzA0MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
