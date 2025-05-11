@@ -600,7 +600,6 @@
 <div class="header-decoration-1"></div>
 <div class="header-decoration-2"></div>
 </div>
-
 <h2 class="text-xl mb-6 flex items-center">
 <svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
 <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
@@ -1100,44 +1099,50 @@ document.addEventListener('DOMContentLoaded', function () {
     const noneCheckbox = document.getElementById('insurance_none');
 
     function updateInsuranceDetails() {
-        let anyInsuranceSelected = false;
+        let anyChecked = false;
         insuranceCheckboxes.forEach(cb => {
             if (cb.checked) {
-                anyInsuranceSelected = true;
+                anyChecked = true;
+                cb.parentElement.querySelector('.checkmark').style.opacity = '1';
+            } else {
+                cb.parentElement.querySelector('.checkmark').style.opacity = '0';
             }
         });
 
-        if (anyInsuranceSelected) {
-            insuranceDetails.classList.add('active');
-            noneCheckbox.checked = false;
-            noneCheckbox.disabled = true;
-            noneCheckbox.parentElement.querySelector('.checkmark').style.opacity = '0';
-        } else {
+        if (noneCheckbox.checked) {
+            noneCheckbox.parentElement.querySelector('.checkmark').style.opacity = '1';
             insuranceDetails.classList.remove('active');
-            noneCheckbox.disabled = false;
+        } else {
+            noneCheckbox.parentElement.querySelector('.checkmark').style.opacity = '0';
+        }
+
+        if (!noneCheckbox.checked && anyChecked) {
+            insuranceDetails.classList.add('active');
+        } else if (!anyChecked) {
+            insuranceDetails.classList.remove('active');
         }
     }
 
-    insuranceCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', updateInsuranceDetails);
+    insuranceCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function () {
+            if (cb.checked) {
+                noneCheckbox.checked = false;
+            }
+            updateInsuranceDetails();
+        });
     });
 
     noneCheckbox.addEventListener('change', function () {
         if (this.checked) {
             insuranceCheckboxes.forEach(cb => {
                 cb.checked = false;
-                cb.disabled = true;
                 cb.parentElement.querySelector('.checkmark').style.opacity = '0';
             });
-            insuranceDetails.classList.remove('active');
-        } else {
-            insuranceCheckboxes.forEach(cb => {
-                cb.disabled = false;
-            });
         }
+        updateInsuranceDetails();
     });
 
-    updateInsuranceDetails(); // Initial prüfen
+    updateInsuranceDetails();
 });
 </script></body>
 </html>
