@@ -1,1185 +1,1550 @@
 
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Finanzanalyse für Eltern</title>
-<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartKidsInvest - Finanzanalyse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': {
+                            DEFAULT: '#0a2f5c',
+                            '50': '#e6edf5',
+                            '100': '#ccdaeb',
+                            '200': '#99b6d7',
+                            '300': '#6691c3',
+                            '400': '#336daf',
+                            '500': '#00489b',
+                            '600': '#003a7c',
+                            '700': '#002b5d',
+                            '800': '#001d3e',
+                            '900': '#000e1f',
+                        },
+                        'gold': {
+                            DEFAULT: '#d4af37',
+                            'light': '#f0e6c0',
+                            'dark': '#b38f28',
+                        }
+                    },
+                    fontFamily: {
+                        'sans': ['Montserrat', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif'],
+                    },
+                    boxShadow: {
+                        'luxury': '0 4px 20px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(212, 175, 55, 0.2)',
+                        'gold': '0 4px 12px rgba(212, 175, 55, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
+        
         body {
-            font-family: 'Quicksand', sans-serif;
-            background-color: #f8fafc;
-            color: #333;
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f8f9fa;
         }
         
-        .page {
-            width: 210mm;
-            min-height: 297mm;
-            padding: 20mm;
-            margin: 10mm auto;
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Playfair Display', serif;
+        }
+        
+        .gold-gradient {
+            background: linear-gradient(135deg, #d4af37 0%, #f0e6c0 50%, #d4af37 100%);
+        }
+        
+        .gold-text {
+            background: linear-gradient(135deg, #d4af37 0%, #f0e6c0 50%, #d4af37 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .luxury-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(212, 175, 55, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .luxury-card:hover {
+            box-shadow: 0 8px 30px 0 rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(212, 175, 55, 0.2);
+        }
+        
+        .luxury-input {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.375rem;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
+        }
+        
+        .luxury-input:focus {
+            border-color: #d4af37;
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+            outline: none;
+        }
+        
+        .luxury-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .luxury-button {
+            background: linear-gradient(135deg, #d4af37 0%, #f0e6c0 50%, #d4af37 100%);
+            color: #0a2f5c;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(212, 175, 55, 0.25);
+            border: none;
+        }
+        
+        .luxury-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(212, 175, 55, 0.3);
+        }
+        
+        .luxury-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(212, 175, 55, 0.2);
+        }
+        
+        .luxury-button-secondary {
+            background: transparent;
+            color: #0a2f5c;
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+            border: 1px solid #d4af37;
+        }
+        
+        .luxury-button-secondary:hover {
+            background-color: rgba(212, 175, 55, 0.1);
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background-color: #e2e8f0;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #d4af37 0%, #f0e6c0 100%);
+            transition: width 0.5s ease;
+        }
+        
+        .checkbox-gold {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 1px solid #d4af37;
+            border-radius: 0.25rem;
             background-color: white;
-            box-shadow: 0 7.52px 22.56px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
             position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .checkbox-gold:checked {
+            background-color: #d4af37;
+            border-color: #d4af37;
+        }
+        
+        .checkbox-gold:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.75rem;
+        }
+        
+        .checkbox-gold:focus {
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+            outline: none;
+        }
+        
+        .radio-gold {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 1.25rem;
+            height: 1.25rem;
+            border: 1px solid #d4af37;
+            border-radius: 50%;
+            background-color: white;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .radio-gold:checked {
+            border-color: #d4af37;
+            border-width: 4px;
+        }
+        
+        .radio-gold:focus {
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
+            outline: none;
+        }
+        
+        .page-transition {
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        
+        .page-enter {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        
+        .page-visible {
+            opacity: 1;
+            transform: translateX(0);
         }
         
         @media print {
-            body {
-                background-color: white;
-                margin: 0;
-                padding: 0;
-            }
-            
-            .page {
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                padding: 20mm;
-                box-shadow: none;
-                page-break-after: always;
-                min-height: auto;
-            }
-            
             .no-print {
                 display: none !important;
             }
             
-            /* Platzhalter ausblenden */
-            input::placeholder, textarea::placeholder {
-                color: transparent !important;
+            .print-break-inside-avoid {
+                break-inside: avoid;
+            }
+            
+            .print-break-before {
+                break-before: page;
+            }
+            
+            body {
+                background-color: white;
+                padding: 0;
+                margin: 0;
+            }
+            
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            
+            .luxury-card {
+                box-shadow: none !important;
+                border: 1px solid #e2e8f0 !important;
+                break-inside: avoid;
+                margin-bottom: 2rem !important;
             }
         }
-        
-        h1 {
-            color: #ffffff;
-            font-weight: 800;
-            text-shadow: 0.94px 0.94px 2.82px rgba(0,0,0,0.3);
-        }
-        
-        h2 {
-            color: #8b5cf6;
-            font-weight: 700;
-        }
-        
-        .section {
-            margin-bottom: 8mm;
-            padding: 5mm;
-            border-radius: 11.28px;
-            position: relative;
-            overflow: hidden;
-            border: none;
-            box-shadow: 0 3.76px 5.64px rgba(0, 0, 0, 0.05);
-            background-color: #fff;
-        }
-        
-        .section::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4.7px;
-            background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd);
-            border-radius: 4.7px 4.7px 0 0;
-        }
-        
-        .section-alt {
-            background-color: #f0f9ff;
-        }
-        
-        .section-alt::before {
-            background: linear-gradient(90deg, #0ea5e9, #38bdf8, #7dd3fc);
-        }
-        
-        .section-green {
-            background-color: #f0fdf4;
-        }
-        
-        .section-green::before {
-            background: linear-gradient(90deg, #10b981, #34d399, #6ee7b7);
-        }
-        
-        .section-purple {
-            background-color: #faf5ff;
-        }
-        
-        .section-purple::before {
-            background: linear-gradient(90deg, #8b5cf6, #a78bfa, #c4b5fd);
-        }
-        
-        .section-orange {
-            background-color: #fff7ed;
-        }
-        
-        .section-orange::before {
-            background: linear-gradient(90deg, #f97316, #fb923c, #fdba74);
-        }
-        
-        input[type="text"], textarea {
-            border: 1.88px solid #93c5fd;
-            border-radius: 7.52px;
-            padding: 9.4px;
-            width: 100%;
-            background-color: #ffffff;
-            transition: all 0.3s ease;
-            font-family: 'Quicksand', sans-serif;
-        }
-        
-        input[type="text"]:focus, textarea:focus {
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 2.82px rgba(59, 130, 246, 0.2);
-            outline: none;
-        }
-        
-        .checkbox-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 3mm;
-            transition: transform 0.2s;
-            padding: 7.52px;
-            border-radius: 7.52px;
-            cursor: pointer;
-            height: 41.36px;
-        }
-        
-        .checkbox-container:hover {
-            background-color: rgba(147, 197, 253, 0.1);
-            transform: translateX(4.7px);
-        }
-        
-        .custom-checkbox {
-            width: 22.56px;
-            height: 22.56px;
-            border: 1.88px solid #3b82f6;
-            border-radius: 5.64px;
-            margin-right: 9.4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            background-color: white;
-            transition: all 0.2s;
-            position: relative;
-        }
-        
-        .custom-checkbox input {
-            opacity: 0;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            z-index: 2;
-        }
-        
-        .custom-checkbox .checkmark {
-            width: 13.16px;
-            height: 13.16px;
-            background-color: #3b82f6;
-            border-radius: 2.82px;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .custom-checkbox input:checked + .checkmark {
-            opacity: 1;
-        }
-        
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            font-weight: 500;
-        }
-        
-        .page-nav {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10mm;
-        }
-        
-        .nav-button {
-            padding: 11.28px 22.56px;
-            border-radius: 47.0px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: none;
-            box-shadow: 0 3.76px 5.64px rgba(0, 0, 0, 0.1);
-            font-family: 'Quicksand', sans-serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 150.4px;
-        }
-        
-        .nav-button:hover {
-            transform: translateY(-1.88px);
-            box-shadow: 0 5.64px 7.52px rgba(0, 0, 0, 0.15);
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: white;
-        }
-        
-        .btn-secondary {
-            background: linear-gradient(135deg, #f472b6, #ec4899);
-            color: white;
-        }
-        
-        .btn-pdf {
-            background: linear-gradient(135deg, #ef4444, #f87171);
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-pdf:active {
-            transform: scale(0.98);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            border-radius: 7.52px;
-            overflow: hidden;
-        }
-        
-        table th, table td {
-            border: 0.94px solid #93c5fd;
-            padding: 9.4px;
-            text-align: left;
-        }
-        
-        table th {
-            background-color: #dbeafe;
-            color: #3b82f6;
-            font-weight: 600;
-            text-align: center;
-        }
-        
-        .icon {
-            display: inline-block;
-            width: 22.56px;
-            height: 22.56px;
-            margin-right: 7.52px;
-            vertical-align: middle;
-        }
-        
-        .page-indicator {
-            text-align: center;
-            margin-top: 5mm;
-            display: flex;
-            justify-content: center;
-            gap: 7.52px;
-        }
-        
-        .dot-indicator {
-            display: inline-block;
-            width: 37.6px;
-            height: 7.52px;
-            border-radius: 3.76px;
-            transition: all 0.3s ease;
-        }
-        
-        .dot-active {
-            background-color: #4f46e5;
-            transform: scale(1.2);
-        }
-        
-        .dot-inactive {
-            background-color: #e2e8f0;
-        }
-        
-        .header-decoration {
-            position: relative;
-            padding-bottom: 9.4px;
-            margin-bottom: 18.8px;
-        }
-        
-        .header-decoration:after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 5.64px;
-            background: linear-gradient(90deg, #3b82f6, #60a5fa, #93c5fd, #bfdbfe, #dbeafe);
-            border-radius: 2.82px;
-        }
-        
-        .page-background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: -1;
-            overflow: hidden;
-        }
-        
-        .color-blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(56.4px);
-            opacity: 0.15;
-        }
-        
-        .blob-1 {
-            width: 282.0px;
-            height: 282.0px;
-            background-color: #60a5fa;
-            top: -94.0px;
-            left: -94.0px;
-        }
-        
-        .blob-2 {
-            width: 235.0px;
-            height: 235.0px;
-            background-color: #38bdf8;
-            bottom: -47.0px;
-            right: -47.0px;
-        }
-        
-        .blob-3 {
-            width: 188.0px;
-            height: 188.0px;
-            background-color: #34d399;
-            bottom: 30%;
-            left: 10%;
-        }
-        
-        .blob-4 {
-            width: 169.2px;
-            height: 169.2px;
-            background-color: #fbbf24;
-            top: 20%;
-            right: 5%;
-        }
-        
-        .section-title {
-            display: flex;
-            align-items: center;
-            margin-bottom: 14.1px;
-            font-weight: 700;
-            color: #4f46e5;
-            font-size: 1.03rem;
-        }
-        
-        .section-icon {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 33.84px;
-            height: 33.84px;
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: white;
-            border-radius: 50%;
-            margin-right: 11.28px;
-            box-shadow: 0 1.88px 3.76px rgba(0, 0, 0, 0.1);
-            flex-shrink: 0;
-        }
-        
-        .section-number {
-            background-color: #4f46e5;
-            color: white;
-            width: 26.32px;
-            height: 26.32px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-right: 9.4px;
-            flex-shrink: 0;
-        }
-        
-        .family-header {
-            background: linear-gradient(135deg, #4f46e5, #6366f1, #8b5cf6);
-            color: white;
-            padding: 18.8px;
-            border-radius: 15.04px;
-            margin-bottom: 18.8px;
-            box-shadow: 0 3.76px 11.28px rgba(0, 0, 0, 0.15);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .header-decoration-1 {
-            position: absolute;
-            top: -18.8px;
-            right: -18.8px;
-            width: 112.8px;
-            height: 112.8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 1;
-        }
-        
-        .header-decoration-2 {
-            position: absolute;
-            bottom: -28.2px;
-            left: 30%;
-            width: 75.2px;
-            height: 75.2px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            z-index: 1;
-        }
-        
-        .radio-group {
-            display: flex;
-            gap: 18.8px;
-            margin-bottom: 14.1px;
-        }
-        
-        .radio-container {
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 7.52px 15.04px;
-            border-radius: 7.52px;
-            transition: all 0.2s;
-            background-color: rgba(196, 181, 253, 0.1);
-        }
-        
-        .radio-container:hover {
-            background-color: rgba(196, 181, 253, 0.2);
-        }
-        
-        .custom-radio {
-            width: 18.8px;
-            height: 18.8px;
-            border: 1.88px solid #8b5cf6;
-            border-radius: 50%;
-            margin-right: 9.4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            position: relative;
-        }
-        
-        .custom-radio input {
-            opacity: 0;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-            z-index: 2;
-        }
-        
-        .custom-radio .radio-dot {
-            width: 9.4px;
-            height: 9.4px;
-            background-color: #8b5cf6;
-            border-radius: 50%;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        
-        .custom-radio input:checked + .radio-dot {
-            opacity: 1;
-        }
-        
-        /* Anpassungen für die Tabelle */
-        .goal-column {
-            width: 40%;
-        }
-        
-        .other-column {
-            width: 20%;
-        }
-        
-        /* Versicherungsdetails */
-        .insurance-details {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            margin-top: 0;
-        }
-        
-        .insurance-details.active {
-            max-height: 282.0px;
-            margin-top: 14.1px;
-        }
-        
-        /* PDF Button Animation */
-        .btn-pdf {
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-pdf .download-icon {
-            transition: transform 0.3s ease;
-        }
-        
-        .btn-pdf:hover .download-icon {
-            animation: bounce 1s infinite;
-        }
-        
-        .btn-pdf::after {
-            content: "";
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 18.8px;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: rotate(30deg);
-            transition: all 0.6s;
-            opacity: 0;
-        }
-        
-        .btn-pdf:hover::after {
-            left: 120%;
-            opacity: 0.7;
-        }
-        
-        .btn-pdf .download-text {
-            position: relative;
-            z-index: 2;
-        }
-        
-        .btn-pdf .download-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 3.76px;
-            width: 0%;
-            background: rgba(255, 255, 255, 0.7);
-            transition: width 0.5s ease;
-            border-radius: 0 0 0 7.52px;
-        }
-        
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% {
-                transform: translateY(0);
-            }
-            40% {
-                transform: translateY(-7.52px);
-            }
-            60% {
-                transform: translateY(-3.76px);
-            }
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-    </style>
+    
+@media print {
+  .print-footer {
+    display: block !important;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 1rem 2rem;
+    background-color: white;
+    border-top: 1px solid #ccc;
+  }
+}
+
+</style>
 </head>
-<body>
-<div class="page" id="page1">
-<div class="page-background">
-<div class="color-blob blob-1"></div>
-<div class="color-blob blob-2"></div>
-<div class="color-blob blob-3"></div>
-<div class="color-blob blob-4"></div>
-</div>
-<div class="family-header" style="margin-bottom: 20px;">
-<div class="header-content">
-<h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
-<p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
-</div>
-<div class="header-decoration-1"></div>
-<div class="header-decoration-2"></div>
-</div>
-<h2 class="text-xl mb-6 flex items-center">
-<svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-            Persönliche Angaben &amp; Erwartungen
-        </h2>
-<div class="section section-purple">
-<div class="mb-4">
-<div class="section-title" style="color: #8b5cf6;">
-<div class="section-number" style="background-color: #8b5cf6;">1</div>
-                    Dein Name
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <!-- Header -->
+        <header class="mb-8 flex justify-between items-center bg-[#0e1e3a] text-white p-6 rounded-lg shadow-luxury">
+            <div>
+                <h1 class="text-3xl md:text-4xl font-bold text-primary">
+                    <span class="gold-text">SmartKidsInvest</span>
+                </h1>
+                <p class="text-gray-600 mt-1">Professionelle Finanzanalyse für Ihre Familie</p>
+            </div>
+            <div class="flex items-center">
+                <div class="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
+                    <i class="fas fa-chart-line text-gold-light text-xl"></i>
                 </div>
-<input class="w-full" id="name" placeholder="Vor- und Nachname" style="border-color: #c4b5fd;" type="text"/>
-</div>
-<div class="mb-4">
-<div class="section-title" style="color: #8b5cf6;">
-<div class="section-number" style="background-color: #8b5cf6;">2</div>
-                    Dein Geburtsdatum
-                </div>
-<input class="w-full" id="birthdate" placeholder="TT.MM.JJJJ" style="border-color: #c4b5fd;" type="text"/>
-</div>
-<div class="mb-4">
-<div class="section-title" style="color: #8b5cf6;">
-<div class="section-number" style="background-color: #8b5cf6;">3</div>
-        Was machst du beruflich?
-    </div>
-<input class="w-full" id="profession" placeholder="z.B. Angestellter, Selbstständig, etc." style="border-color: #c4b5fd;" type="text"/>
-</div><div class="mb-4">
-<div class="section-title" style="color: #8b5cf6;">
-<div class="section-number" style="background-color: #8b5cf6;">4</div>
-                    Wie viele Kinder hast Du – und wie heißen sie? (inkl. Geburtsdaten)
-                </div>
-<textarea class="w-full" id="children" placeholder="z.B. Max (01.01.2015), Emma (15.06.2018)" rows="3" style="border-color: #c4b5fd;"></textarea>
-<div class="mt-4">
-<div class="section-title" style="color: #8b5cf6; margin-bottom: 10px;">
-<div class="section-number" style="background-color: #8b5cf6;">5</div>
-                        Wie ist dein Kind krankenversichert?
-                    </div>
-<div class="radio-group">
-<label class="radio-container">
-<div class="custom-radio">
-<input id="insurance_gesetzlich" name="insurance_type" type="radio" value="gesetzlich"/>
-<div class="radio-dot"></div>
-</div>
-<span>Gesetzlich</span>
-</label>
-<label class="radio-container">
-<div class="custom-radio">
-<input id="insurance_privat" name="insurance_type" type="radio" value="privat"/>
-<div class="radio-dot"></div>
-</div>
-<span>Privat</span>
-</label>
-</div>
-<div class="mt-2">
-<div class="section-title" style="color: #8b5cf6; margin-bottom: 10px;">
-<div class="section-number" style="background-color: #8b5cf6;">6</div>
-                            Bei welcher Krankenversicherung?
+            </div>
+        </header>
+        
+        <!-- Progress Bar -->
+        <div class="mb-12 no-print">
+            <div class="flex justify-between text-sm text-gray-500 mb-2">
+                <span>Start</span>
+                <span>Abschluss</span>
+            </div>
+            <div class="progress-bar">
+                <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+            </div>
+        </div>
+        
+        <!-- Pages Container -->
+        <div id="pages-container">
+            <!-- Page 1: Persönliche Daten -->
+            <div id="page-1" class="page page-visible">
+                <div class="luxury-card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
+                        <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm mr-3">1</span>
+                        Persönliche Daten
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="name">Dein Name</label>
+                            <input type="text" id="name" class="luxury-input w-full" placeholder="Vor- und Nachname">
                         </div>
-<input class="w-full" id="insurance_company" placeholder="Name der Krankenversicherung" style="border-color: #c4b5fd;" type="text"/>
-</div>
-<div class="mt-4">
-<div class="section-title" style="color: #8b5cf6; margin-bottom: 10px;">
-<div class="section-number" style="background-color: #8b5cf6;">7</div>
-                            Was ist dein Jahresbruttoeinkommen?
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="birthdate">Dein Geburtsdatum</label>
+                            <input type="date" id="birthdate" class="luxury-input w-full">
                         </div>
-<input class="w-full" id="annual_income" placeholder="z.B. 60.000€" style="border-color: #c4b5fd;" type="text"/>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="profession">Beruf</label>
+                            <input type="text" id="profession" class="luxury-input w-full" placeholder="Aktuelle Tätigkeit">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="income">Wie hoch ist das Haushaltsjahreseinkommen?</label>
+                            <div class="relative">
+                                <input type="text" id="income" class="luxury-input w-full pl-8" placeholder="z.B. 60.000">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <span class="text-gray-500">€</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="children-count">Wie viele Kinder hast du?</label>
+                            <input type="number" id="children-count" class="luxury-input w-full" min="0" placeholder="Anzahl der Kinder">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="children-names">Wie heißen deine Kinder? inkl. Geburtsdaten</label>
+                            <textarea id="children-names" class="luxury-input w-full" rows="3" placeholder="z.B. Max (01.01.2015), Lisa (03.05.2018)"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2">Wie sind deine Kinder krankenversichert?</label>
+                            <div class="flex space-x-6 mt-2">
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="insurance-type" value="Gesetzlich" class="radio-gold">
+                                    <span class="ml-2">Gesetzlich</span>
+                                </label>
+                                <label class="inline-flex items-center">
+                                    <input type="radio" name="insurance-type" value="Privat" class="radio-gold">
+                                    <span class="ml-2">Privat</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="insurance-company">Bei welcher Krankenversicherung?</label>
+                            <input type="text" id="insurance-company" class="luxury-input w-full" placeholder="Name der Krankenversicherung">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end no-print">
+                    <button id="next-1" class="luxury-button">
+                        Weiter <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Page 2: Erwartungshaltung -->
+            <div id="page-2" class="page hidden page-enter">
+                <div class="luxury-card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
+                        <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm mr-3">2</span>
+                        Erwartungshaltung
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="experience">Welche Erfahrungen hast du bereits gemacht?</label>
+                            <textarea id="experience" class="luxury-input w-full" rows="3" placeholder="Deine bisherigen Erfahrungen mit Finanzprodukten und Anlagen"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="expectations">Was erwartest du von dem Konzept?</label>
+                            <textarea id="expectations" class="luxury-input w-full" rows="3" placeholder="Deine Erwartungen an SmartKidsInvest"></textarea>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="recommendation">Was müsste passieren, dass du uns weiterempfiehlst?</label>
+                            <textarea id="recommendation" class="luxury-input w-full" rows="3" placeholder="Deine Kriterien für eine Weiterempfehlung"></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between no-print">
+                    <button id="prev-2" class="luxury-button-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Zurück
+                    </button>
+                    <button id="next-2" class="luxury-button">
+                        Weiter <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Page 3: Konzepterstellung -->
+            <div id="page-3" class="page hidden page-enter">
+                <div class="luxury-card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
+                        <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm mr-3">3</span>
+                        Konzepterstellung
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="goal">Was ist dein Ziel?</label>
+                            <textarea id="goal" class="luxury-input w-full" rows="2" placeholder="Beschreibe dein finanzielles Ziel für deine Kinder"></textarea>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2" for="monthly-budget">Monatliches Budget</label>
+                                <div class="relative">
+                                    <input type="number" id="monthly-budget" class="luxury-input w-full pl-8" placeholder="z.B. 100" min="0">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <span class="text-gray-500">€</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label class="block text-gray-700 font-medium mb-2" for="investment-duration">Anlagedauer in Jahren</label>
+                                <input type="number" id="investment-duration" class="luxury-input w-full" placeholder="z.B. 18" min="1" max="30">
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-gray-700 font-medium mb-2" for="savings">Hast du bereits Rücklagen?</label>
+                            <div class="relative">
+                                <input type="number" id="savings" class="luxury-input w-full pl-8" placeholder="z.B. 5000" min="0">
+                                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                    <span class="text-gray-500">€</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-xl font-semibold text-primary">Vermögensentwicklung</h3>
+                                <button id="calculate-btn" class="luxury-button-secondary text-sm py-2">
+                                    <i class="fas fa-calculator mr-2"></i> Berechnen
+                                </button>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg border border-gray-200">
+                                <canvas id="investment-chart" height="300"></canvas>
+                            </div>
+                            
+                            <div id="calculation-results" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="luxury-card p-6">
+                                    <h4 class="text-lg font-semibold mb-2 gold-text">SmartKidsInvest (7% p.a.)</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Einzahlungen gesamt:</span>
+                                            <span id="ski-total-payments" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Rendite:</span>
+                                            <span id="ski-total-interest" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between text-lg">
+                                            <span class="font-semibold">Endkapital:</span>
+                                            <span id="ski-final-amount" class="font-bold text-primary">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="luxury-card p-6">
+                                    <h4 class="text-lg font-semibold mb-2">Sparbuch (0,3% p.a.)</h4>
+                                    <div class="space-y-2">
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Einzahlungen gesamt:</span>
+                                            <span id="savings-total-payments" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-gray-600">Rendite:</span>
+                                            <span id="savings-total-interest" class="font-semibold">-</span>
+                                        </div>
+                                        <div class="flex justify-between text-lg">
+                                            <span class="font-semibold">Endkapital:</span>
+                                            <span id="savings-final-amount" class="font-semibold">-</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="advantage-highlight" class="mt-6 p-6 bg-primary-50 border-l-4 border-gold rounded-r-lg hidden">
+                                <h4 class="text-lg font-semibold text-primary mb-2">Dein Vorteil mit SmartKidsInvest</h4>
+                                <div class="flex items-center">
+                                    <div class="w-12 h-12 rounded-full bg-gold flex items-center justify-center mr-4">
+                                        <i class="fas fa-trophy text-white"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-gray-700">Mit SmartKidsInvest erzielst du einen Mehrwert von <span id="advantage-amount" class="font-bold text-primary">-</span> gegenüber einem herkömmlichen Sparbuch.</p>
+                                        <p class="text-sm text-gray-600 mt-1">Das entspricht einem Renditeunterschied von <span id="advantage-percentage" class="font-semibold">-</span>.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between no-print">
+                    <button id="prev-3" class="luxury-button-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Zurück
+                    </button>
+                    <button id="next-3" class="luxury-button">
+                        Weiter <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Page 4: Absicherungen und Präferenzen -->
+            <div id="page-4" class="page hidden page-enter">
+                <div class="luxury-card p-8 mb-8">
+                    <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
+                        <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm mr-3">4</span>
+                        Absicherungen und Präferenzen
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <h3 class="text-xl font-semibold text-primary mb-4">Welche Absicherungen hast du bereits für dein Kind?</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" class="checkbox-gold insurance-checkbox" value="Berufsunfähigkeit">
+                                        <span class="ml-2">Berufsunfähigkeit</span>
+                                    </label>
+                                    <div class="insurance-details hidden mt-2 ml-7">
+                                        <textarea class="luxury-input w-full" rows="2" placeholder="Details zur Berufsunfähigkeitsversicherung"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" class="checkbox-gold insurance-checkbox" value="Krankenzusatz">
+                                        <span class="ml-2">Krankenzusatz</span>
+                                    </label>
+                                    <div class="insurance-details hidden mt-2 ml-7">
+                                        <textarea class="luxury-input w-full" rows="2" placeholder="Details zur Krankenzusatzversicherung"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" class="checkbox-gold insurance-checkbox" value="Unfallversicherung">
+                                        <span class="ml-2">Unfallversicherung</span>
+                                    </label>
+                                    <div class="insurance-details hidden mt-2 ml-7">
+                                        <textarea class="luxury-input w-full" rows="2" placeholder="Details zur Unfallversicherung"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" class="checkbox-gold insurance-checkbox" value="Risikoleben">
+                                        <span class="ml-2">Risikoleben</span>
+                                    </label>
+                                    <div class="insurance-details hidden mt-2 ml-7">
+                                        <textarea class="luxury-input w-full" rows="2" placeholder="Details zur Risikolebensversicherung"></textarea>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" id="no-insurance" class="checkbox-gold" value="Keine">
+                                        <span class="ml-2">Keine</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-semibold text-primary mb-4">Was ist dir wichtig?</h3>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full">
+                                    <thead>
+                                        <tr>
+                                            <th class="text-left py-2 px-4">Aspekt</th>
+                                            <th class="text-center py-2 px-4">Ist dir das wichtig?</th>
+                                            <th class="text-center py-2 px-4">Priorität</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-4 px-4">Hohe Rendite</td>
+                                            <td class="py-4 px-4 text-center">
+                                                <input type="checkbox" class="checkbox-gold preference-checkbox" data-preference="rendite">
+                                            </td>
+                                            <td class="py-4 px-4">
+                                                <div class="preference-priority hidden">
+                                                    <select class="luxury-input luxury-select w-full">
+                                                        <option value="Sehr wichtig">Sehr wichtig</option>
+                                                        <option value="Wichtig">Wichtig</option>
+                                                        <option value="Uninteressant">Uninteressant</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-4 px-4">Flexibilität</td>
+                                            <td class="py-4 px-4 text-center">
+                                                <input type="checkbox" class="checkbox-gold preference-checkbox" data-preference="flexibilität">
+                                            </td>
+                                            <td class="py-4 px-4">
+                                                <div class="preference-priority hidden">
+                                                    <select class="luxury-input luxury-select w-full">
+                                                        <option value="Sehr wichtig">Sehr wichtig</option>
+                                                        <option value="Wichtig">Wichtig</option>
+                                                        <option value="Uninteressant">Uninteressant</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-4 px-4">Kontrolle des Geldes über dem 18. Lebensjahr hinaus</td>
+                                            <td class="py-4 px-4 text-center">
+                                                <input type="checkbox" class="checkbox-gold preference-checkbox" data-preference="kontrolle">
+                                            </td>
+                                            <td class="py-4 px-4">
+                                                <div class="preference-priority hidden">
+                                                    <select class="luxury-input luxury-select w-full">
+                                                        <option value="Sehr wichtig">Sehr wichtig</option>
+                                                        <option value="Wichtig">Wichtig</option>
+                                                        <option value="Uninteressant">Uninteressant</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-4 px-4">Gesundheit absichern</td>
+                                            <td class="py-4 px-4 text-center">
+                                                <input type="checkbox" class="checkbox-gold preference-checkbox" data-preference="gesundheit">
+                                            </td>
+                                            <td class="py-4 px-4">
+                                                <div class="preference-priority hidden">
+                                                    <select class="luxury-input luxury-select w-full">
+                                                        <option value="Sehr wichtig">Sehr wichtig</option>
+                                                        <option value="Wichtig">Wichtig</option>
+                                                        <option value="Uninteressant">Uninteressant</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-4 px-4">Steuervorteile nutzen</td>
+                                            <td class="py-4 px-4 text-center">
+                                                <input type="checkbox" class="checkbox-gold preference-checkbox" data-preference="steuer">
+                                            </td>
+                                            <td class="py-4 px-4">
+                                                <div class="preference-priority hidden">
+                                                    <select class="luxury-input luxury-select w-full">
+                                                        <option value="Sehr wichtig">Sehr wichtig</option>
+                                                        <option value="Wichtig">Wichtig</option>
+                                                        <option value="Uninteressant">Uninteressant</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr class="border-t border-gray-200">
+                                            <td class="py-4 px-4">Für den Ernstfall vorsorgen</td>
+                                            <td class="py-4 px-4 text-center">
+                                                <input type="checkbox" class="checkbox-gold preference-checkbox" data-preference="ernstfall">
+                                            </td>
+                                            <td class="py-4 px-4">
+                                                <div class="preference-priority hidden">
+                                                    <select class="luxury-input luxury-select w-full">
+                                                        <option value="Sehr wichtig">Sehr wichtig</option>
+                                                        <option value="Wichtig">Wichtig</option>
+                                                        <option value="Uninteressant">Uninteressant</option>
+                                                    </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-semibold text-primary mb-4">Kapitalimmobilie</h3>
+                            
+                            <div class="mb-4">
+                                <label class="block text-gray-700 font-medium mb-2">Ist das Thema Kapitalimmobilie für dich interessant?</label>
+                                <div class="flex space-x-6 mt-2">
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="real-estate-interest" value="Ja" class="radio-gold" id="real-estate-yes">
+                                        <span class="ml-2">Ja</span>
+                                    </label>
+                                    <label class="inline-flex items-center">
+                                        <input type="radio" name="real-estate-interest" value="Nein" class="radio-gold" id="real-estate-no">
+                                        <span class="ml-2">Nein</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            
+<div id="berater-selection" class="mt-4 hidden">
+  <label class="block text-gray-700 font-medium mb-2">Berater auswählen</label>
+  <select id="berater-dropdown" class="luxury-input luxury-select w-full">
+    <option value="137645">Lasse Falke</option>
+    <option value="927364">Franziska Maier</option>
+    
+  </select>
 </div>
-<div class="mb-4">
-<div class="section-title" style="color: #8b5cf6;">
-<div class="section-number" style="background-color: #8b5cf6;">8</div>
-        Erhältst du vermögenswirksame Leistungen?
+<div id="real-estate-info" class="mt-6 p-6 bg-primary-50 rounded-lg hidden">
+                                <h4 class="text-lg font-semibold text-primary mb-3">Vorteile einer Kapitalimmobilie:</h4>
+                                <p class="text-gray-700 mb-4">Eine Kapitalimmobilie bietet dir langfristige Wertsteigerung, Inflationsschutz und steuerliche Vorteile. Sie ist eine solide Anlage für die Zukunft deiner Familie.</p>
+                                
+                                <h4 class="text-lg font-semibold text-primary mb-3">Voraussetzungen:</h4>
+                                <ul class="list-disc list-inside text-gray-700 space-y-1 mb-6">
+                                    <li>Singles: Mindestens 2.500€ netto Einkommen</li>
+                                    <li>Paare: Mindestens 3.500€ netto gemeinsames Einkommen</li>
+                                    <li>Eigenkapitalnachweis: 5.000-10.000€ (muss nicht eingesetzt werden)</li>
+                                    <li>Mindestinvestition: 100€ monatlich</li>
+                                </ul>
+                                
+                                <a href="https://brimo-kapitalanlagen.dokume.app/#/realestate_signup/index/137645" target="_blank" class="luxury-button inline-block">
+                                    Hier registrieren <i class="fas fa-external-link-alt ml-2"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between no-print">
+                    <button id="prev-4" class="luxury-button-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Zurück
+                    </button>
+                    <button id="next-4" class="luxury-button">
+                        Weiter <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Page 5: Zusammenfassung -->
+            <div id="page-5" class="page hidden page-enter">
+                <div class="luxury-card p-8 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-bold text-primary flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center text-sm mr-3">5</span>
+                            Zusammenfassung
+                        </h2>
+                        
+                    </div>
+                    
+                    <div class="space-y-8">
+                        <!-- Persönliche Daten Zusammenfassung -->
+                        <div class="print-break-inside-avoid">
+                            <h3 class="text-xl font-semibold text-primary mb-4 pb-2 border-b border-gray-200">Persönliche Daten</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Name</p>
+                                    <p id="summary-name" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Geburtsdatum</p>
+                                    <p id="summary-birthdate" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Beruf</p>
+                                    <p id="summary-profession" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Haushaltsjahreseinkommen</p>
+                                    <p id="summary-income" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Anzahl Kinder</p>
+                                    <p id="summary-children-count" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Kinder (mit Geburtsdaten)</p>
+                                    <p id="summary-children-names" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Krankenversicherung</p>
+                                    <p id="summary-insurance-type" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Krankenversicherungsgesellschaft</p>
+                                    <p id="summary-insurance-company" class="font-medium">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Erwartungshaltung Zusammenfassung -->
+                        <div class="print-break-inside-avoid">
+                            <h3 class="text-xl font-semibold text-primary mb-4 pb-2 border-b border-gray-200">Erwartungshaltung</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Bisherige Erfahrungen</p>
+                                    <p id="summary-experience" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Erwartungen an das Konzept</p>
+                                    <p id="summary-expectations" class="font-medium">-</p>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-gray-600 text-sm">Kriterien für Weiterempfehlung</p>
+                                    <p id="summary-recommendation" class="font-medium">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Konzepterstellung Zusammenfassung -->
+                        <div class="print-break-inside-avoid print-break-before">
+                            <h3 class="text-xl font-semibold text-primary mb-4 pb-2 border-b border-gray-200">Konzepterstellung</h3>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <p class="text-gray-600 text-sm">Finanzielles Ziel</p>
+                                    <p id="summary-goal" class="font-medium">-</p>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <p class="text-gray-600 text-sm">Monatliches Budget</p>
+                                        <p id="summary-monthly-budget" class="font-medium">-</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <p class="text-gray-600 text-sm">Anlagedauer</p>
+                                        <p id="summary-investment-duration" class="font-medium">-</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <p class="text-gray-600 text-sm">Vorhandene Rücklagen</p>
+                                        <p id="summary-savings" class="font-medium">-</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-semibold text-primary mb-4">Vermögensentwicklung</h4>
+                                    
+                                    <div class="bg-white p-4 rounded-lg border border-gray-200 mb-6">
+                                        <canvas id="summary-chart" height="300"></canvas>
+                                    </div>
+                                    
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div class="luxury-card p-6">
+                                            <h4 class="text-lg font-semibold mb-2 gold-text">SmartKidsInvest (7% p.a.)</h4>
+                                            <div class="space-y-2">
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Einzahlungen gesamt:</span>
+                                                    <span id="summary-ski-total-payments" class="font-semibold">-</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Rendite:</span>
+                                                    <span id="summary-ski-total-interest" class="font-semibold">-</span>
+                                                </div>
+                                                <div class="flex justify-between text-lg">
+                                                    <span class="font-semibold">Endkapital:</span>
+                                                    <span id="summary-ski-final-amount" class="font-bold text-primary">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="luxury-card p-6">
+                                            <h4 class="text-lg font-semibold mb-2">Sparbuch (0,3% p.a.)</h4>
+                                            <div class="space-y-2">
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Einzahlungen gesamt:</span>
+                                                    <span id="summary-savings-total-payments" class="font-semibold">-</span>
+                                                </div>
+                                                <div class="flex justify-between">
+                                                    <span class="text-gray-600">Rendite:</span>
+                                                    <span id="summary-savings-total-interest" class="font-semibold">-</span>
+                                                </div>
+                                                <div class="flex justify-between text-lg">
+                                                    <span class="font-semibold">Endkapital:</span>
+                                                    <span id="summary-savings-final-amount" class="font-semibold">-</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div id="summary-advantage-highlight" class="mt-6 p-6 bg-primary-50 border-l-4 border-gold rounded-r-lg">
+                                        <h4 class="text-lg font-semibold text-primary mb-2">Dein Vorteil mit SmartKidsInvest</h4>
+                                        <div class="flex items-center">
+                                            <div class="w-12 h-12 rounded-full bg-gold flex items-center justify-center mr-4">
+                                                <i class="fas fa-trophy text-white"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-gray-700">Mit SmartKidsInvest erzielst du einen Mehrwert von <span id="summary-advantage-amount" class="font-bold text-primary">-</span> gegenüber einem herkömmlichen Sparbuch.</p>
+                                                <p class="text-sm text-gray-600 mt-1">Das entspricht einem Renditeunterschied von <span id="summary-advantage-percentage" class="font-semibold">-</span>.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Absicherungen und Präferenzen Zusammenfassung -->
+                        <div class="print-break-inside-avoid print-break-before">
+                            <h3 class="text-xl font-semibold text-primary mb-4 pb-2 border-b border-gray-200">Absicherungen und Präferenzen</h3>
+                            
+                            <div class="space-y-6">
+                                <div>
+                                    <h4 class="text-lg font-semibold text-primary mb-3">Vorhandene Absicherungen</h4>
+                                    <div id="summary-insurances">
+                                        <p class="text-gray-500 italic">Keine Angaben</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-semibold text-primary mb-3">Wichtige Aspekte</h4>
+                                    <div id="summary-preferences">
+                                        <p class="text-gray-500 italic">Keine Angaben</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <h4 class="text-lg font-semibold text-primary mb-3">Interesse an Kapitalimmobilie</h4>
+                                    <p id="summary-real-estate-interest" class="font-medium">-</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Abschluss -->
+                        <div class="print-break-inside-avoid">
+                            <div class="p-6 bg-primary rounded-lg text-white">
+                                <h3 class="text-xl font-bold mb-3">Vielen Dank für dein Vertrauen!</h3>
+                                <p>Diese Finanzanalyse wurde erstellt am <span id="summary-date" class="font-medium"></span> und dient als Grundlage für deine individuelle Beratung bei SmartKidsInvest.</p>
+                                <div class="mt-4 flex items-center">
+                                    <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center mr-3">
+                                        <i class="fas fa-chart-line text-primary text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold gold-text">SmartKidsInvest</p>
+                                        <p class="text-sm">Professionelle Finanzlösungen für deine Familie</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between no-print">
+                    <button id="prev-5" class="luxury-button-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Zurück
+                    </button>
+                    <button id="print-btn" class="luxury-button mr-4"><i class="fas fa-print mr-2"></i> Finanzanalyse drucken</button>
+                    <button id="restart-btn" class="luxury-button">
+                        <i class="fas fa-redo mr-2"></i> Neue Analyse starten
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
-<div class="radio-group">
-<label class="radio-container">
-<div class="custom-radio">
-<input id="vwl_yes" name="vwl" onclick="toggleVWLInfo(true)" type="radio" value="ja"/>
-<div class="radio-dot"></div>
-</div>
-<span>Ja</span>
-</label>
-<label class="radio-container">
-<div class="custom-radio">
-<input id="vwl_no" name="vwl" onclick="toggleVWLInfo(false)" type="radio" value="nein"/>
-<div class="radio-dot"></div>
-</div>
-<span>Nein</span>
-</label>
-</div>
-<div class="mt-3" id="vwl_info" style="display: none;">
-<input class="w-full" id="vwl_details" placeholder="Bitte gib weitere Informationen an (z.B. Höhe, über wen, etc.)" style="border-color: #c4b5fd;" type="text"/>
-</div>
-</div>
-<script>
-    function toggleVWLInfo(show) {
-        const vwlDiv = document.getElementById('vwl_info');
-        vwlDiv.style.display = show ? 'block' : 'none';
-    }
-</script>
-</div>
-</div>
-</div>
-<div class="section section-orange" style="page-break-before: always;">
-<div class="mb-4">
-<div class="section-title" style="color: #f97316;">
-<div class="section-number" style="background-color: #f97316;">9</div>
-                    Was erwartest Du von einer guten Kindervorsorge?
-                </div>
-<textarea class="w-full" id="expectations" placeholder="Deine Erwartungen an eine gute Kindervorsorge" rows="2" style="border-color: #fdba74;"></textarea>
-</div>
-<div class="mb-4">
-<div class="section-title" style="color: #f97316;">
-<div class="section-number" style="background-color: #f97316;">10</div>
-                    Ist auch eine Kapitalanlageimmobilie für dich interessant?
-                </div>
-<div class="radio-group">
-<label class="radio-container">
-<div class="custom-radio" style="border-color: #f97316;">
-<input id="property_yes" name="property_investment" type="radio" value="ja"/>
-<div class="radio-dot" style="background-color: #f97316;"></div>
-</div>
-<span>Ja</span>
-</label>
-<label class="radio-container">
-<div class="custom-radio" style="border-color: #f97316;">
-<input id="property_no" name="property_investment" type="radio" value="nein"/>
-<div class="radio-dot" style="background-color: #f97316;"></div>
-</div>
-<span>Nein</span>
-</label>
-</div>
-</div>
-<div class="mb-4">
-<div class="section-title" style="color: #f97316;">
-<div class="section-number" style="background-color: #f97316;">11</div>
-                    Welche Erfahrungen hast Du bisher mit Geldanlage oder Absicherung für Dein(e) Kind(er) gemacht?
-                </div>
-<textarea class="w-full" id="experience" placeholder="Deine bisherigen Erfahrungen" rows="2" style="border-color: #fdba74;"></textarea>
-</div>
-</div>
-<div class="page-nav no-print">
-<div></div>
-<a class="nav-button btn-primary flex items-center" href="#" onclick="showPage(2); return false;">
-                Weiter zu Seite 2
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</a>
-</div>
-<div class="page-indicator no-print">
-<span class="dot-indicator dot-active"></span>
-<span class="dot-indicator dot-inactive"></span>
-<span class="dot-indicator dot-inactive"></span>
-</div>
-</div>
-<div class="page" id="page2" style="display: none;">
-<div class="page-background">
-<div class="color-blob blob-1"></div>
-<div class="color-blob blob-2"></div>
-<div class="color-blob blob-3"></div>
-<div class="color-blob blob-4"></div>
-</div>
-<div class="family-header" style="margin-bottom: 20px;">
-<div class="header-content">
-<h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
-<p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
-</div>
-<div class="header-decoration-1"></div>
-<div class="header-decoration-2"></div>
-</div>
-<h2 class="text-xl mb-6 flex items-center" style="color: #8b5cf6;">
-<svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-            Ziele &amp; Prioritäten
-        </h2>
-<div class="section section-green">
-<div class="section-title" style="color: #10b981;">
-<div class="section-number" style="background-color: #10b981;">12</div>
-                Ziele für Dein(e) Kind(er)
-            </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #10b981;">
-<input id="goal1" type="checkbox"/>
-<div class="checkmark" style="background-color: #10b981;"></div>
-</div>
-<div class="checkbox-label">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                        Vermögen für Ausbildung / Studium aufbauen
-                    </div>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #10b981;">
-<input id="goal2" type="checkbox"/>
-<div class="checkmark" style="background-color: #10b981;"></div>
-</div>
-<div class="checkbox-label">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                        Startkapital ansparen
-                    </div>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #10b981;">
-<input id="goal3" type="checkbox"/>
-<div class="checkmark" style="background-color: #10b981;"></div>
-</div>
-<div class="checkbox-label">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                        Erste eigene Immobilie erwerben
-                    </div>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #10b981;">
-<input id="goal4" type="checkbox"/>
-<div class="checkmark" style="background-color: #10b981;"></div>
-</div>
-<div class="checkbox-label">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M11 17l-5-5m0 0l5-5m-5 5h12" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                        Flexible Rücklagen für Zwischenziele
-                    </div>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #10b981;">
-<input id="goal5" type="checkbox"/>
-<div class="checkmark" style="background-color: #10b981;"></div>
-</div>
-<div class="checkbox-label">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                        Schutz bei Unfall oder Krankheit
-                    </div>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #10b981;">
-<input id="goal6" type="checkbox"/>
-<div class="checkmark" style="background-color: #10b981;"></div>
-</div>
-<div class="checkbox-label">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#10b981" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                        Langfristige finanzielle Sicherheit aufbauen
-                    </div>
-</label>
-</div>
-</div>
-<div class="section section-orange">
-<div class="section-title" style="color: #f97316;">
-<div class="section-number" style="background-color: #f97316;">13</div>
-                Das ist mir besonders wichtig
-            </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="prio1" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Hohe Rendite</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="prio2" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Flexibilität (Geld jederzeit verfügbar)</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="prio3" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Kontrolle des Geldes über dem 18. Lebensjahr</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="prio4" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Steuervorteile nutzen</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="prio5" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Staatliche Zulagen sichern</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="prio6" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Gesundheitliche Risiken absichern</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="prio7" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Vorhandene Finanzprodukte optimieren</span>
-</label>
-</div>
-</div>
-<div class="page-nav no-print">
-<a class="nav-button btn-secondary flex items-center" href="#" onclick="showPage(1); return false;">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                Zurück zu Seite 1
-            </a>
-<a class="nav-button btn-primary flex items-center" href="#" onclick="showPage(3); return false;">
-                Weiter zu Seite 3
-                <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-</a>
-</div>
-<div class="page-indicator no-print">
-<span class="dot-indicator dot-inactive"></span>
-<span class="dot-indicator dot-active"></span>
-<span class="dot-indicator dot-inactive"></span>
-</div>
-</div>
-<div class="page" id="page3" style="display: none;">
-<div class="page-background">
-<div class="color-blob blob-1"></div>
-<div class="color-blob blob-2"></div>
-<div class="color-blob blob-3"></div>
-<div class="color-blob blob-4"></div>
-</div>
-<div class="family-header" style="margin-bottom: 20px;">
-<div class="header-content">
-<h1 class="text-3xl mb-2 font-extrabold">Finanzanalyse für Eltern</h1>
-<p class="text-lg font-medium">SmartKidsInvest - Für eine sichere Zukunft deiner Kinder</p>
-</div>
-<div class="header-decoration-1"></div>
-<div class="header-decoration-2"></div>
-</div>
-<h2 class="text-xl mb-4 flex items-center" style="color: #10b981;">
-<svg class="w-7 h-7 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-            Finanzielle Planung &amp; Absicherung
-        </h2>
-<div class="section section-purple">
-<div class="section-title" style="color: #8b5cf6;">
-<div class="section-number" style="background-color: #8b5cf6;">14</div>
-                Finanzielle Eingaben
-            </div>
-<div class="mb-3">
-<label class="block mb-1 flex items-center">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                    Verfügbares Budget für Kindervorsorge
-                </label>
-<input class="w-full" id="budget" placeholder="z.B. 100€ monatlich" style="border-color: #c4b5fd;" type="text"/>
-</div>
-<div class="mb-3">
-<label class="block mb-1 flex items-center">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                    Bereits vorhandene Rücklagen fürs Kind
-                </label>
-<input class="w-full" id="savings" placeholder="z.B. 1.000€" style="border-color: #c4b5fd;" type="text"/>
-</div>
-<div class="mb-3">
-<label class="block mb-1 flex items-center">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="#8b5cf6" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                    Bis zu welchem Alter planst Du das Investment?
-                </label>
-<input class="w-full" id="investmentAge" placeholder="z.B. 18 Jahre oder 25 Jahre" style="border-color: #c4b5fd;" type="text"/>
-</div>
-</div>
-<div class="section section-green">
-<div class="section-title" style="color: #10b981;">
-<div class="section-number" style="background-color: #10b981;">15</div>
-                Kapitalbedarf nach Ziel &amp; Zeitpunkt
-            </div>
-<div class="overflow-x-auto">
-<table class="w-full mb-4 rounded-lg overflow-hidden">
-<thead>
-<tr>
-<th class="goal-column" style="background-color: #d1fae5; color: #10b981;">Ziel</th>
-<th class="other-column" style="background-color: #d1fae5; color: #10b981;">Alter</th>
-<th class="other-column" style="background-color: #d1fae5; color: #10b981;">Kapitalbedarf</th>
-<th class="other-column" style="background-color: #d1fae5; color: #10b981;">Priorität (1–5)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><input class="w-full border-0" id="goal_1_name" placeholder="z.B. Führerschein" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_1_age" placeholder="18" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_1_capital" placeholder="2.000€" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_1_priority" placeholder="2" style="border-color: #6ee7b7;" type="text"/></td>
-</tr>
-<tr>
-<td><input class="w-full border-0" id="goal_2_name" placeholder="z.B. Studium" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_2_age" placeholder="19-25" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_2_capital" placeholder="30.000€" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_2_priority" placeholder="1" style="border-color: #6ee7b7;" type="text"/></td>
-</tr>
-<tr>
-<td><input class="w-full border-0" id="goal_3_name" placeholder="z.B. Erste Wohnung" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_3_age" placeholder="25" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_3_capital" placeholder="20.000€" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_3_priority" placeholder="3" style="border-color: #6ee7b7;" type="text"/></td>
-</tr>
-<tr>
-<td><input class="w-full border-0" id="goal_4_name" placeholder="z.B. Weltreise" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_4_age" placeholder="21" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_4_capital" placeholder="10.000€" style="border-color: #6ee7b7;" type="text"/></td>
-<td><input class="w-full border-0" id="goal_4_priority" placeholder="4" style="border-color: #6ee7b7;" type="text"/></td>
-</tr>
-</tbody>
-</table>
-</div>
-</div>
-<div class="section section-orange" style="page-break-before: always;">
-<div class="section-title" style="color: #f97316;">
-<div class="section-number" style="background-color: #f97316;">16</div>
-                Bestehende Absicherung
-            </div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input class="insurance-checkbox" id="insurance1" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Berufsunfähigkeit</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input class="insurance-checkbox" id="insurance2" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Unfallversicherung für das Kind</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input class="insurance-checkbox" id="insurance3" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Krankenzusatzversicherung</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input class="insurance-checkbox" id="insurance4" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Risikolebensversicherung der Eltern</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input class="insurance-checkbox" id="insurance5" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Vorsorgevollmacht &amp; Patientenverfügung</span>
-</label>
-<label class="checkbox-container">
-<div class="custom-checkbox" style="border-color: #f97316;">
-<input id="insurance_none" type="checkbox"/>
-<div class="checkmark" style="background-color: #f97316;"></div>
-</div>
-<span>Keine</span>
-</label>
-</div>
-<div class="insurance-details" id="insuranceDetails">
-<div class="mt-4">
-<label class="block mb-2 font-medium">Bitte gib Details zu deinen bestehenden Versicherungen an:</label>
-<textarea class="w-full" id="insurance_details_text" placeholder="z.B. Versicherungsgesellschaft, Versicherungssumme, monatlicher Beitrag, etc." rows="4" style="border-color: #fdba74;"></textarea>
-</div>
-</div>
-</div>
-<div class="page-nav no-print">
-<a class="nav-button btn-secondary flex items-center" href="#" onclick="showPage(2); return false;">
-<svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                Zurück zu Seite 2
-            </a>
-<a class="nav-button btn-pdf flex items-center" href="#" onclick="generatePDF(); return false;">
-<div class="download-text flex items-center">
-<svg class="w-5 h-5 mr-2 download-icon" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-                    PDF herunterladen
-                </div>
-<div class="download-progress"></div>
-</a>
-</div>
-<div class="page-indicator no-print">
-<span class="dot-indicator dot-inactive"></span>
-<span class="dot-indicator dot-inactive"></span>
-<span class="dot-indicator dot-active"></span>
-</div>
-</div>
-<script>
-    function generatePDF() {
-        // Zeige alle Seiten
-        document.querySelectorAll('.page').forEach(page => page.style.display = 'block');
-        window.print();
 
-        // Nach dem Drucken aktuelle Seite anzeigen (z.B. Seite 3)
-        setTimeout(() => {
-            document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
-            document.getElementById('page3').style.display = 'block';
-        }, 1000);
-    }
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
 
-    function showPage(pageNum) {
-        document.querySelectorAll('.page').forEach(page => page.style.display = 'none');
-        document.getElementById('page' + pageNum).style.display = 'block';
-        window.scrollTo(0, 0);
-    }
-</script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'93e45f9e4315e527',t:'MTc0Njk5NDc5MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>
-document.addEventListener('DOMContentLoaded', function () {
-    const insuranceCheckboxes = document.querySelectorAll('.insurance-checkbox');
-    const insuranceDetails = document.getElementById('insuranceDetails');
-    const noneCheckbox = document.getElementById('insurance_none');
+    const realEstateYes = document.getElementById('real-estate-yes');
+    const beraterDropdown = document.getElementById('berater-dropdown');
+    const beraterBox = document.getElementById('berater-selection');
+    const registerLink = document.querySelector('#real-estate-info a');
 
-    function updateInsuranceDetails() {
-        let anyChecked = false;
-        insuranceCheckboxes.forEach(cb => {
-            if (cb.checked) {
-                anyChecked = true;
-                cb.parentElement.querySelector('.checkmark').style.opacity = '1';
-            } else {
-                cb.parentElement.querySelector('.checkmark').style.opacity = '0';
-            }
-        });
-
-        if (noneCheckbox.checked) {
-            noneCheckbox.parentElement.querySelector('.checkmark').style.opacity = '1';
-            insuranceDetails.classList.remove('active');
-        } else {
-            noneCheckbox.parentElement.querySelector('.checkmark').style.opacity = '0';
-        }
-
-        if (!noneCheckbox.checked && anyChecked) {
-            insuranceDetails.classList.add('active');
-        } else if (!anyChecked) {
-            insuranceDetails.classList.remove('active');
-        }
-    }
-
-    insuranceCheckboxes.forEach(cb => {
-        cb.addEventListener('change', function () {
-            if (cb.checked) {
-                noneCheckbox.checked = false;
-            }
-            updateInsuranceDetails();
-        });
+    realEstateYes?.addEventListener('change', () => {
+      if (realEstateYes.checked) {
+        beraterBox.classList.remove('hidden');
+      }
     });
 
-    noneCheckbox.addEventListener('change', function () {
-        if (this.checked) {
-            insuranceCheckboxes.forEach(cb => {
-                cb.checked = false;
-                cb.parentElement.querySelector('.checkmark').style.opacity = '0';
+    beraterDropdown?.addEventListener('change', () => {
+      const beraterId = beraterDropdown.value;
+      registerLink.href = `https://brimo-kapitalanlagen.dokume.app/#/realestate_signup/index/${beraterId}`;
+    });
+
+            // Variables
+            const pages = document.querySelectorAll('.page');
+            const progressFill = document.getElementById('progress-fill');
+            let currentPage = 1;
+            let totalPages = pages.length;
+            let investmentChart = null;
+            let summaryChart = null;
+            let calculationData = null;
+            
+            // Initialize
+            updateProgressBar();
+            
+            // Navigation buttons
+            document.getElementById('next-1').addEventListener('click', () => navigateToPage(2));
+            document.getElementById('prev-2').addEventListener('click', () => navigateToPage(1));
+            document.getElementById('next-2').addEventListener('click', () => navigateToPage(3));
+            document.getElementById('prev-3').addEventListener('click', () => navigateToPage(2));
+            document.getElementById('next-3').addEventListener('click', () => navigateToPage(4));
+            document.getElementById('prev-4').addEventListener('click', () => navigateToPage(3));
+            document.getElementById('next-4').addEventListener('click', () => {
+                generateSummary();
+                navigateToPage(5);
             });
-        }
-        updateInsuranceDetails();
-    });
+            document.getElementById('prev-5').addEventListener('click', () => navigateToPage(4));
+            document.getElementById('restart-btn').addEventListener('click', restartAnalysis);
+            
+            // Calculate button
+            document.getElementById('calculate-btn').addEventListener('click', calculateInvestment);
+            
+            // Print button
+            document.getElementById('print-btn').addEventListener('click', printAnalysis);
+            
+            // Insurance checkboxes
+            const insuranceCheckboxes = document.querySelectorAll('.insurance-checkbox');
+            const noInsuranceCheckbox = document.getElementById('no-insurance');
+            
+            insuranceCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const detailsDiv = this.parentElement.nextElementSibling;
+                    if (this.checked) {
+                        detailsDiv.classList.remove('hidden');
+                        noInsuranceCheckbox.checked = false;
+                    } else {
+                        detailsDiv.classList.add('hidden');
+                    }
+                });
+            });
+            
+            noInsuranceCheckbox.addEventListener('change', function() {
+                if (this.checked) {
+                    insuranceCheckboxes.forEach(checkbox => {
+                        checkbox.checked = false;
+                        const detailsDiv = checkbox.parentElement.nextElementSibling;
+                        detailsDiv.classList.add('hidden');
+                    });
+                }
+            });
+            
+            // Preference checkboxes
+            const preferenceCheckboxes = document.querySelectorAll('.preference-checkbox');
+            
+            preferenceCheckboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const priorityDiv = this.closest('td').nextElementSibling.querySelector('.preference-priority');
+                    if (this.checked) {
+                        priorityDiv.classList.remove('hidden');
+                    } else {
+                        priorityDiv.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // Real estate interest
+            document.getElementById('real-estate-yes').addEventListener('change', function() {
+                if (this.checked) {
+                    document.getElementById('real-estate-info').classList.remove('hidden');
+                }
+            });
+            
+            document.getElementById('real-estate-no').addEventListener('change', function() {
+                if (this.checked) {
+                    document.getElementById('real-estate-info').classList.add('hidden');
+                }
+            });
+            
+            // Functions
+            function navigateToPage(pageNumber) {
+                if (pageNumber < 1 || pageNumber > totalPages) return;
+                
+                // Hide current page
+                pages[currentPage - 1].classList.add('page-enter');
+                pages[currentPage - 1].classList.remove('page-visible');
+                
+                setTimeout(() => {
+                    pages[currentPage - 1].classList.add('hidden');
+                    
+                    // Show new page
+                    currentPage = pageNumber;
+                    pages[currentPage - 1].classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        pages[currentPage - 1].classList.remove('page-enter');
+                        pages[currentPage - 1].classList.add('page-visible');
+                        updateProgressBar();
+                    }, 50);
+                }, 300);
+            }
+            
+            function updateProgressBar() {
+                const progress = ((currentPage - 1) / (totalPages - 1)) * 100;
+                progressFill.style.width = `${progress}%`;
+            }
+            
+            function calculateInvestment() {
+                const monthlyBudget = parseFloat(document.getElementById('monthly-budget').value) || 0;
+                const investmentDuration = parseInt(document.getElementById('investment-duration').value) || 0;
+                const initialSavings = parseFloat(document.getElementById('savings').value) || 0;
+                
+                if (monthlyBudget <= 0 || investmentDuration <= 0) {
+                    alert('Bitte gib ein monatliches Budget und eine Anlagedauer ein.');
+                    return;
+                }
+                
+                // Calculate investment growth
+                const skiRate = 0.07; // 7% annual return
+                const savingsRate = 0.003; // 0.3% annual return
+                
+                const years = Array.from({length: investmentDuration + 1}, (_, i) => i);
+                const skiValues = [];
+                const savingsValues = [];
+                
+                let skiValue = initialSavings;
+                let savingsValue = initialSavings;
+                
+                skiValues.push(skiValue);
+                savingsValues.push(savingsValue);
+                
+                for (let year = 1; year <= investmentDuration; year++) {
+                    skiValue = skiValue * (1 + skiRate) + monthlyBudget * 12;
+                    savingsValue = savingsValue * (1 + savingsRate) + monthlyBudget * 12;
+                    
+                    skiValues.push(skiValue);
+                    savingsValues.push(savingsValue);
+                }
+                
+                // Store calculation data for summary
+                calculationData = {
+                    monthlyBudget,
+                    investmentDuration,
+                    initialSavings,
+                    years,
+                    skiValues,
+                    savingsValues
+                };
+                
+                // Calculate totals
+                const totalPayments = initialSavings + (monthlyBudget * 12 * investmentDuration);
+                const skiFinalAmount = skiValues[skiValues.length - 1];
+                const savingsFinalAmount = savingsValues[savingsValues.length - 1];
+                const skiTotalInterest = skiFinalAmount - totalPayments;
+                const savingsTotalInterest = savingsFinalAmount - totalPayments;
+                const advantage = skiFinalAmount - savingsFinalAmount;
+                const advantagePercentage = ((skiFinalAmount / savingsFinalAmount) - 1) * 100;
+                
+                // Update results
+                document.getElementById('ski-total-payments').textContent = formatCurrency(totalPayments);
+                document.getElementById('ski-total-interest').textContent = formatCurrency(skiTotalInterest);
+                document.getElementById('ski-final-amount').textContent = formatCurrency(skiFinalAmount);
+                
+                document.getElementById('savings-total-payments').textContent = formatCurrency(totalPayments);
+                document.getElementById('savings-total-interest').textContent = formatCurrency(savingsTotalInterest);
+                document.getElementById('savings-final-amount').textContent = formatCurrency(savingsFinalAmount);
+                
+                document.getElementById('advantage-amount').textContent = formatCurrency(advantage);
+                document.getElementById('advantage-percentage').textContent = formatPercentage(advantagePercentage);
+                document.getElementById('advantage-highlight').classList.remove('hidden');
+                
+                // Create or update chart
+                createOrUpdateChart(years, skiValues, savingsValues);
+            }
+            
+            function createOrUpdateChart(years, skiValues, savingsValues) {
+                const ctx = document.getElementById('investment-chart').getContext('2d');
+                
+                // Destroy existing chart if it exists
+                if (investmentChart) {
+                    investmentChart.destroy();
+                }
+                
+                // Create new chart
+                investmentChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: years,
+                        datasets: [
+                            {
+                                label: 'SmartKidsInvest (7% p.a.)',
+                                data: skiValues,
+                                borderColor: '#d4af37',
+                                backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            },
+                            {
+                                label: 'Sparbuch (0,3% p.a.)',
+                                data: savingsValues,
+                                borderColor: '#0a2f5c',
+                                backgroundColor: 'rgba(10, 47, 92, 0.1)',
+                                borderWidth: 2,
+                                fill: true,
+                                tension: 0.4
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.dataset.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        label += formatCurrency(context.parsed.y);
+                                        return label;
+                                    }
+                                }
+                            },
+                            legend: {
+                                position: 'top',
+                            }
+                        },
+                        scales: {
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Jahre'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Vermögen (€)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return formatCurrency(value, false);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function generateSummary() {
+                // Personal data
+                document.getElementById('summary-name').textContent = document.getElementById('name').value || '-';
+                document.getElementById('summary-birthdate').textContent = formatDate(document.getElementById('birthdate').value) || '-';
+                document.getElementById('summary-profession').textContent = document.getElementById('profession').value || '-';
+                document.getElementById('summary-income').textContent = formatCurrency(document.getElementById('income').value) || '-';
+                document.getElementById('summary-children-count').textContent = document.getElementById('children-count').value || '-';
+                document.getElementById('summary-children-names').textContent = document.getElementById('children-names').value || '-';
+                
+                const insuranceType = document.querySelector('input[name="insurance-type"]:checked');
+                document.getElementById('summary-insurance-type').textContent = insuranceType ? insuranceType.value : '-';
+                document.getElementById('summary-insurance-company').textContent = document.getElementById('insurance-company').value || '-';
+                
+                // Expectations
+                document.getElementById('summary-experience').textContent = document.getElementById('experience').value || '-';
+                document.getElementById('summary-expectations').textContent = document.getElementById('expectations').value || '-';
+                document.getElementById('summary-recommendation').textContent = document.getElementById('recommendation').value || '-';
+                
+                // Concept
+                document.getElementById('summary-goal').textContent = document.getElementById('goal').value || '-';
+                document.getElementById('summary-monthly-budget').textContent = formatCurrency(document.getElementById('monthly-budget').value) || '-';
+                document.getElementById('summary-investment-duration').textContent = document.getElementById('investment-duration').value ? `${document.getElementById('investment-duration').value} Jahre` : '-';
+                document.getElementById('summary-savings').textContent = formatCurrency(document.getElementById('savings').value) || '-';
+                
+                // Investment calculation
+                if (calculationData) {
+                    // Copy calculation results
+                    document.getElementById('summary-ski-total-payments').textContent = document.getElementById('ski-total-payments').textContent;
+                    document.getElementById('summary-ski-total-interest').textContent = document.getElementById('ski-total-interest').textContent;
+                    document.getElementById('summary-ski-final-amount').textContent = document.getElementById('ski-final-amount').textContent;
+                    
+                    document.getElementById('summary-savings-total-payments').textContent = document.getElementById('savings-total-payments').textContent;
+                    document.getElementById('summary-savings-total-interest').textContent = document.getElementById('savings-total-interest').textContent;
+                    document.getElementById('summary-savings-final-amount').textContent = document.getElementById('savings-final-amount').textContent;
+                    
+                    document.getElementById('summary-advantage-amount').textContent = document.getElementById('advantage-amount').textContent;
+                    document.getElementById('summary-advantage-percentage').textContent = document.getElementById('advantage-percentage').textContent;
+                    
+                    // Create summary chart
+                    const summaryCtx = document.getElementById('summary-chart').getContext('2d');
+                    
+                    // Destroy existing chart if it exists
+                    if (summaryChart) {
+                        summaryChart.destroy();
+                    }
+                    
+                    // Create new chart
+                    summaryChart = new Chart(summaryCtx, {
+                        type: 'line',
+                        data: {
+                            labels: calculationData.years,
+                            datasets: [
+                                {
+                                    label: 'SmartKidsInvest (7% p.a.)',
+                                    data: calculationData.skiValues,
+                                    borderColor: '#d4af37',
+                                    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true,
+                                    tension: 0.4
+                                },
+                                {
+                                    label: 'Sparbuch (0,3% p.a.)',
+                                    data: calculationData.savingsValues,
+                                    borderColor: '#0a2f5c',
+                                    backgroundColor: 'rgba(10, 47, 92, 0.1)',
+                                    borderWidth: 2,
+                                    fill: true,
+                                    tension: 0.4
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let label = context.dataset.label || '';
+                                            if (label) {
+                                                label += ': ';
+                                            }
+                                            label += formatCurrency(context.parsed.y);
+                                            return label;
+                                        }
+                                    }
+                                },
+                                legend: {
+                                    position: 'top',
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Jahre'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Vermögen (€)'
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return formatCurrency(value, false);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Insurances
+                const insurancesDiv = document.getElementById('summary-insurances');
+                const selectedInsurances = [];
+                
+                document.querySelectorAll('.insurance-checkbox:checked').forEach(checkbox => {
+                    const value = checkbox.value;
+                    const details = checkbox.parentElement.nextElementSibling.querySelector('textarea').value;
+                    selectedInsurances.push({ type: value, details: details });
+                });
+                
+                if (document.getElementById('no-insurance').checked) {
+                    selectedInsurances.push({ type: 'Keine', details: '' });
+                }
+                
+                if (selectedInsurances.length > 0) {
+                    let insuranceHtml = '<ul class="space-y-2">';
+                    selectedInsurances.forEach(insurance => {
+                        insuranceHtml += `<li><span class="font-medium">${insurance.type}</span>`;
+                        if (insurance.details) {
+                            insuranceHtml += `<p class="text-gray-600 text-sm mt-1">${insurance.details}</p>`;
+                        }
+                        insuranceHtml += '</li>';
+                    });
+                    insuranceHtml += '</ul>';
+                    insurancesDiv.innerHTML = insuranceHtml;
+                } else {
+                    insurancesDiv.innerHTML = '<p class="text-gray-500 italic">Keine Angaben</p>';
+                }
+                
+                // Preferences
+                const preferencesDiv = document.getElementById('summary-preferences');
+                const selectedPreferences = [];
+                
+                document.querySelectorAll('.preference-checkbox:checked').forEach(checkbox => {
+                    const preference = checkbox.dataset.preference;
+                    const priority = checkbox.closest('tr').querySelector('select').value;
+                    selectedPreferences.push({ type: preference, priority: priority });
+                });
+                
+                if (selectedPreferences.length > 0) {
+                    let preferencesHtml = '<ul class="space-y-2">';
+                    selectedPreferences.forEach(pref => {
+                        preferencesHtml += `<li><span class="font-medium">${capitalizeFirstLetter(pref.type)}</span>: <span class="text-primary">${pref.priority}</span></li>`;
+                    });
+                    preferencesHtml += '</ul>';
+                    preferencesDiv.innerHTML = preferencesHtml;
+                } else {
+                    preferencesDiv.innerHTML = '<p class="text-gray-500 italic">Keine Angaben</p>';
+                }
+                
+                // Real estate interest
+                const realEstateInterest = document.querySelector('input[name="real-estate-interest"]:checked');
+                document.getElementById('summary-real-estate-interest').textContent = realEstateInterest ? realEstateInterest.value : '-';
+                
+                // Date
+                document.getElementById('summary-date').textContent = formatDate(new Date());
+            }
+            
+            function printAnalysis() {
+                window.print();
+            }
+            
+            function restartAnalysis() {
+                // Reset form fields
+                document.querySelectorAll('input:not([type="radio"]):not([type="checkbox"])').forEach(input => {
+                    input.value = '';
+                });
+                
+                document.querySelectorAll('textarea').forEach(textarea => {
+                    textarea.value = '';
+                });
+                
+                document.querySelectorAll('input[type="radio"], input[type="checkbox"]').forEach(input => {
+                    input.checked = false;
+                });
+                
+                // Reset calculation data
+                calculationData = null;
+                
+                // Hide details sections
+                document.querySelectorAll('.insurance-details, .preference-priority, #real-estate-info, #advantage-highlight').forEach(el => {
+                    el.classList.add('hidden');
+                });
+                
+                // Reset charts
+                if (investmentChart) {
+                    investmentChart.destroy();
+                    investmentChart = null;
+                }
+                
+                if (summaryChart) {
+                    summaryChart.destroy();
+                    summaryChart = null;
+                }
+                
+                // Reset calculation results
+                document.getElementById('ski-total-payments').textContent = '-';
+                document.getElementById('ski-total-interest').textContent = '-';
+                document.getElementById('ski-final-amount').textContent = '-';
+                document.getElementById('savings-total-payments').textContent = '-';
+                document.getElementById('savings-total-interest').textContent = '-';
+                document.getElementById('savings-final-amount').textContent = '-';
+                
+                // Navigate to first page
+                navigateToPage(1);
+            }
+            
+            // Helper functions
+            function formatCurrency(value, includeSymbol = true) {
+                if (!value) return includeSymbol ? '0,00 €' : '0';
+                
+                const num = parseFloat(value);
+                const formatted = num.toLocaleString('de-DE', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                
+                return includeSymbol ? `${formatted} €` : formatted;
+            }
+            
+            function formatPercentage(value) {
+                if (!value) return '0%';
+                
+                const num = parseFloat(value);
+                const formatted = num.toLocaleString('de-DE', {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1
+                });
+                
+                return `${formatted}%`;
+            }
+            
+            function formatDate(dateString) {
+                if (!dateString) return '';
+                
+                const date = new Date(dateString);
+                return date.toLocaleDateString('de-DE');
+            }
+            
+            function capitalizeFirstLetter(string) {
+                return string.charAt(0).toUpperCase() + string.slice(1);
+            }
+        });
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'94f9c430c46de515',t:'MTc0OTkwMzQ2NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script>
+<!-- Professioneller Footer -->
+<footer class="bg-[#0e1e3a] text-white mt-12 py-8 px-4 no-print">
+  <div class="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+    <div class="flex items-center space-x-4">
+      <img src="Logo_transparent-removebg-preview (1).png" alt="Lion Finance Logo" class="h-12 w-auto">
+      <div>
+        <p class="font-bold text-lg">SmartKidsInvest</p>
+        <p class="text-sm">Lise-Meitner-Straße 9<br>24223 Schwentinental</p>
+      </div>
+    </div>
+    <div class="text-center md:text-right">
+      <p class="text-sm">Kontakt: <a href="mailto:info@smartkidsinvest.de" class="text-gold hover:underline">info@smartkidsinvest.de</a></p>
+      <p class="text-xs text-gray-400 mt-1">© SmartKidsInvest – Alle Rechte vorbehalten</p>
+    </div>
+  </div>
+</footer>
 
-    updateInsuranceDetails();
-});
-</script></body>
+
+<!-- Footer für Druckversion auf letzter Seite -->
+<footer class="print-footer hidden no-print:block">
+  <div class="text-center text-sm text-gray-600 mt-12 border-t pt-4">
+    <img src="Logo_transparent-removebg-preview (1).png" alt="SmartKidsInvest Logo" class="h-10 mx-auto mb-2">
+    <p>SmartKidsInvest – Lise-Meitner-Straße 9, 24223 Schwentinental</p>
+    <p>info@smartkidsinvest.de</p>
+  </div>
+</footer>
+
+</body>
 </html>
