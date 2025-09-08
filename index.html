@@ -330,6 +330,10 @@
 <input class="luxury-input w-full" id="adresse" placeholder="Aktuelle Adresse" type="text"/>
 </div>
 <div>
+<label class="block text-gray-700 font-medium mb-2" for="profession">Familienstand</label>
+<input class="luxury-input w-full" id="familienstand" placeholder="Familienstand" type="text"/>
+</div>
+<div>
 <label class="block text-gray-700 font-medium mb-2" for="income">Wie hoch ist das Haushaltsjahreseinkommen?</label>
 <div class="relative">
 <input class="luxury-input w-full pl-8" id="income" placeholder="z.B. 60.000" type="text"/>
@@ -742,6 +746,10 @@
 <div>
 <p class="text-gray-600 text-sm">Adresse</p>
 <p class="font-medium" id="summary-adresse">-</p>
+</div>
+<div>
+<p class="text-gray-600 text-sm">Familienstand</p>
+<p class="font-medium" id="summary-familienstand">-</p>
 </div>
 <div>
 <p class="text-gray-600 text-sm">Beruf</p>
@@ -1205,6 +1213,7 @@
                 document.getElementById('summary-children-count').textContent = document.getElementById('children-count').value || '-';
                 document.getElementById('summary-children-names').textContent = document.getElementById('children-names').value || '-';
                 document.getElementById('summary-adresse').textContent = document.getElementById('adresse').value || '-';
+                document.getElementById('summary-familienstand').textContent = document.getElementById('familienstand').value || '-';
                 
                 const insuranceType = document.querySelector('input[name="insurance-type"]:checked');
                 document.getElementById('summary-insurance-type').textContent = insuranceType ? insuranceType.value : '-';
@@ -1486,6 +1495,7 @@
 </body>
 
 </html>
+
 
 
 
